@@ -50,8 +50,7 @@
       },
       "notification": {
         "all": true
-      },
-      "allowDevTools": true
+      }
     },
     "bundle": {
       "active": true,
