@@ -11,6 +11,20 @@ import Locale from "../../locales";
 import { getServerSideConfig } from "@/app/config/server";
 import de from "@/app/locales/de";
 export class GeminiProApi implements LLMApi {
+  path(path: string): string {
+    const accessStore = useAccessStore.getState();
+    let baseUrl = accessStore.googleUrl;
+
+    if (baseUrl.length === 0) {
+      baseUrl = "/api/google/";
+    }
+
+    if (baseUrl.endsWith("/")) {
+      baseUrl = baseUrl.slice(0, baseUrl.length - 1);
+    }
+
+    return [baseUrl, path].join("/");
+  }
   extractMessage(res: any) {
     console.log("[Response] gemini-pro response: ", res);
 
@@ -212,9 +226,6 @@ export class GeminiProApi implements LLMApi {
   }
   async models(): Promise<LLMModel[]> {
     return [];
-  }
-  path(path: string): string {
-    return "/api/google/" + path;
   }
 }
 

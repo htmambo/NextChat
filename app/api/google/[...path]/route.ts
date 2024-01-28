@@ -24,7 +24,6 @@ async function handle(
   if (!baseUrl.startsWith("http")) {
     baseUrl = `https://${baseUrl}`;
   }
-  baseUrl = `https://gemini.arpl.eu.org/`;
 
   if (baseUrl.endsWith("/")) {
     baseUrl = baseUrl.slice(0, -1);
