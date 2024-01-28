@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "../../auth";
 import { getServerSideConfig } from "@/app/config/server";
 import { GEMINI_BASE_URL, Google, ModelProvider } from "@/app/constant";
+import { useAccessStore, useAppConfig, useChatStore } from "@/app/store";
 
 async function handle(
   req: NextRequest,
@@ -16,10 +17,18 @@ async function handle(
   const controller = new AbortController();
 
   const serverConfig = getServerSideConfig();
+  const accessStore = useAccessStore.getState();
 
-  let baseUrl = serverConfig.googleUrl || GEMINI_BASE_URL;
-  console.log(serverConfig);
-  console.log(baseUrl);
+  let baseUrl = accessStore.googleUrl || serverConfig.googleUrl || GEMINI_BASE_URL;
+  return NextResponse.json(
+    {
+      error: true,
+      message: `baseUrl is ${baseUrl}`,
+    },
+    {
+      status: 401,
+    },
+  );
 
   if (!baseUrl.startsWith("http")) {
     baseUrl = `https://${baseUrl}`;
@@ -67,15 +76,6 @@ async function handle(
   }
 
   const fetchUrl = `${baseUrl}/${path}?key=${key}`;
-  return NextResponse.json(
-    {
-      error: true,
-      message: `fetchUrl is ${fetchUrl}`,
-    },
-    {
-      status: 401,
-    },
-  );
   const fetchOptions: RequestInit = {
     headers: {
       "Content-Type": "application/json",
