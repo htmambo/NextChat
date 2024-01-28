@@ -67,6 +67,15 @@ async function handle(
   }
 
   const fetchUrl = `${baseUrl}/${path}?key=${key}`;
+  return NextResponse.json(
+    {
+      error: true,
+      message: `fetchUrl is ${fetchUrl}`,
+    },
+    {
+      status: 401,
+    },
+  );
   const fetchOptions: RequestInit = {
     headers: {
       "Content-Type": "application/json",
