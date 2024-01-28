@@ -102,11 +102,11 @@ export class GeminiProApi implements LLMApi {
         console.log("[Request] chat path: ", chatPath);
         // 删除chatPayload.headers中的authorization
         delete chatPayload.headers["Authorization"];
-        chatPath = chatPath.replaceAll("/api/google/", "");
+        chatPath = chatPath.replaceAll("api/google/", "");
         // 删除v1beta/v1beta/
         chatPath = chatPath.replaceAll("/v1beta/v1beta/", "/v1beta/");
         // 重新设置chatPath
-        chatPath = `${baseUrl}/v1beta/${chatPath}`;
+        chatPath = `${baseUrl}/${chatPath}`;
         // 拼接key参数
         chatPath = `${chatPath}?key=${googleApiKey}`;
       }
