@@ -98,8 +98,10 @@ export class GeminiProApi implements LLMApi {
       let googleApiKey = accessStore.googleApiKey;
       if (baseUrl.length !== 0 && googleApiKey.length !== 0) {
         // 删除chatPayload.headers中的authorization
-        delete chatPayload.headers["authorization"];
+        delete chatPayload.headers["Authorization"];
         chatPath = chatPath.replaceAll("/api/google/", "");
+        // 删除v1beta/v1beta/
+        chatPath = chatPath.replaceAll("/v1beta/v1beta/", "/v1beta/");
         // 重新设置chatPath
         chatPath = `${baseUrl}/v1beta/${chatPath}`;
         // 拼接key参数
