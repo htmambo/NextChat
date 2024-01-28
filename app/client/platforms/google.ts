@@ -13,9 +13,10 @@ import de from "@/app/locales/de";
 export class GeminiProApi implements LLMApi {
   path(path: string): string {
     const accessStore = useAccessStore.getState();
-    let baseUrl = accessStore.googleUrl;
+    const isApp = !!getClientConfig()?.isApp;
 
-    if (baseUrl.length === 0) {
+    let baseUrl = accessStore.googleUrl;
+    if (!!isApp) {
       baseUrl = "/api/google/";
     }
 
@@ -95,7 +96,10 @@ export class GeminiProApi implements LLMApi {
 
     console.log("[Request] google payload: ", requestPayload);
 
-    const shouldStream = !!options.config.stream;
+    let shouldStream = !!options.config.stream;
+    const accessStore = useAccessStore.getState();
+    const isApp = !!getClientConfig()?.isApp;
+    if (isApp) shouldStream = false;
     const controller = new AbortController();
     options.onController?.(controller);
     try {
