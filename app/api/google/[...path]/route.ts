@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "../../auth";
 import { getServerSideConfig } from "@/app/config/server";
 import { GEMINI_BASE_URL, Google, ModelProvider } from "@/app/constant";
-import { useAccessStore } from "@/app/store";
 
 async function handle(
   req: NextRequest,
@@ -17,9 +16,8 @@ async function handle(
   const controller = new AbortController();
 
   const serverConfig = getServerSideConfig();
-  const accessStore = useAccessStore.getState();
 
-  let baseUrl = accessStore.googleUrl || serverConfig.googleUrl || GEMINI_BASE_URL;
+  let baseUrl = serverConfig.googleUrl || GEMINI_BASE_URL;
   return NextResponse.json(
     {
       error: true,

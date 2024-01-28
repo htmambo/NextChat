@@ -9,7 +9,7 @@ import { prettyObject } from "@/app/utils/format";
 import { getClientConfig } from "@/app/config/client";
 import Locale from "../../locales";
 import { getServerSideConfig } from "@/app/config/server";
-import de from "@/app/locales/de";
+
 export class GeminiProApi implements LLMApi {
   extractMessage(res: any) {
     console.log("[Response] gemini-pro response: ", res);
@@ -85,13 +85,26 @@ export class GeminiProApi implements LLMApi {
     const controller = new AbortController();
     options.onController?.(controller);
     try {
-      const chatPath = this.path(Google.ChatPath);
-      const chatPayload = {
+      let chatPath = this.path(Google.ChatPath);
+      let chatPayload = {
         method: "POST",
         body: JSON.stringify(requestPayload),
         signal: controller.signal,
         headers: getHeaders(),
       };
+      const accessStore = useAccessStore.getState();
+
+      let baseUrl = accessStore.googleUrl;
+      let googleApiKey = accessStore.googleApiKey;
+      if (baseUrl.length !== 0 && googleApiKey.length !== 0) {
+        // 删除chatPayload.headers中的authorization
+        delete chatPayload.headers["authorization"];
+        chatPath = chatPath.replaceAll("/api/google/", "");
+        // 重新设置chatPath
+        chatPath = `${baseUrl}/v1beta/${chatPath}`;
+        // 拼接key参数
+        chatPath = `${chatPath}?key=${googleApiKey}`;
+      }
 
       // make a fetch request
       const requestTimeoutId = setTimeout(
