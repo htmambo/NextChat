@@ -34,7 +34,6 @@
       "window": {
         "all": false,
         "close": true,
-        "devtools": true,
         "hide": true,
         "maximize": true,
         "minimize": true,
@@ -51,7 +50,8 @@
       },
       "notification": {
         "all": true
-      }
+      },
+      "allowDevTools": true
     },
     "bundle": {
       "active": true,
