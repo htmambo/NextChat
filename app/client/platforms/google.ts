@@ -16,7 +16,9 @@ export class GeminiProApi implements LLMApi {
     const isApp = !!getClientConfig()?.isApp;
 
     let baseUrl = accessStore.googleUrl;
-    if (!!isApp) {
+    if (isApp) {
+      path = path+"?key="+accessStore.googleApiKey;
+    } else {
       baseUrl = "/api/google/";
     }
 
