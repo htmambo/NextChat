@@ -18,15 +18,6 @@ async function handle(
   const serverConfig = getServerSideConfig();
 
   let baseUrl = serverConfig.googleUrl || GEMINI_BASE_URL;
-  return NextResponse.json(
-    {
-      error: true,
-      message: `baseUrl is ${baseUrl}`,
-    },
-    {
-      status: 401,
-    },
-  );
 
   if (!baseUrl.startsWith("http")) {
     baseUrl = `https://${baseUrl}`;
@@ -37,7 +28,6 @@ async function handle(
   }
 
   let path = `${req.nextUrl.pathname}`.replaceAll("/api/google/", "");
-  console.log(path);
 
   console.log("[Proxy] ", path);
   console.log("[Base Url]", baseUrl);
