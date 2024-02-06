@@ -84,6 +84,7 @@ jobs:
         if: steps.check-title.outputs.result == '"continue"'
         with:
           node-version: 18
+          cache: 'yarn'
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         if: steps.check-title.outputs.result == '"continue"'
