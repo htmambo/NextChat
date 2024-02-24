@@ -74,7 +74,12 @@ const bn: PartialLocaleType = {
     Copy: "সমস্তটি কপি করুন",
     Download: "ডাউনলোড করুন",
     MessageFromYou: "আপনার বার্তা",
-    MessageFromChatGPT: "চ্যাটজিপিটির বার্তা",
+    MessageFromChatGPT: {
+      NoRole: "চ্যাটজিপিটি থেকে বার্তা",
+      RoleAssistant: "সহযোগী",
+      RoleSystem: "সিস্টেম",
+      SysMemoryPrompt: "সিস্টেম মেমোরি প্রম্পট",
+    },
     Share: "শেয়ার করুন শেয়ারজিপিটি তে",
     Format: {
       Title: "রপ্তানি ফরম্যাট",
@@ -161,6 +166,10 @@ const bn: PartialLocaleType = {
       Title: "প্রিভিউ বুলবুল প্রেরণ করুন",
       SubTitle: "বুলবুলে মার্কডাউন প্রিভিউ করুন",
     },
+    AutoScrollMessage: {
+      Title: "অটো-স্ক্রল উত্তর",
+      SubTitle: "উত্তর দেওয়ার সময় বার্তা স্ক্রল করুন",
+    },
     Mask: {
       Splash: {
         Title: "মাস্ক স্প্ল্যাশ স্ক্রিন",
@@ -203,11 +212,14 @@ const bn: PartialLocaleType = {
     Usage: {
       Title: "একাউন্ট ব্যালেন্স",
       SubTitle(used: any, total: any) {
-        return `এই মাসে ব্যবহৃত $${used}, সাবস্ক্রিপশন $${total}`;
+        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('bn-BD', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "অজানা";
+        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('bn-BD', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "অজানা";
+        const usedFormatted = new Intl.NumberFormat('bn-BD', { style: 'currency', currency: 'USD' }).format(used);
+        return `এই মাসে ব্যবহৃত: ${usedFormatted}, হার্ড সীমা: ${hardLimitusd}, অনুমোদিত ব্যবহার সীমা: ${hardLimit}`;
       },
       IsChecking: "চেক করা হচ্ছে...",
       Check: "চেক",
-      NoAccess: "ব্যালেন্স চেক করতে অ্যাপি কী ইনপুট করুন",
+      NoAccess: `ব্যালেন্স চেক করতে, API কি-তে "sess-" উপসর্গ দিয়ে সেশন কি প্রবেশ করান।`,
     },
 
     Model: "মডেল",
@@ -262,6 +274,10 @@ const bn: PartialLocaleType = {
   },
   FineTuned: {
     Sysmessage: "আপনি একটি সহকারী যা",
+  },
+  PrivacyPage: {
+    Name: "গোপনীয়তা",
+    Confirm: "সম্মত",
   },
   Mask: {
     Name: "মাস্ক",
@@ -321,6 +337,7 @@ const bn: PartialLocaleType = {
     Cancel: "বাতিল করুন",
     Close: "বন্ধ করুন",
     Create: "তৈরি করুন",
+    Continue: "চালিয়ে যান",
     Edit: "সম্পাদন করুন",
   },
   Exporter: {

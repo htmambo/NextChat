@@ -1,6 +1,8 @@
+import { getClientConfig } from "./config/client";
 import { useEffect, useState } from "react";
 import { showToast } from "./components/ui-lib";
 import Locale from "./locales";
+import { useAccessStore } from "./store";
 import { RequestMessage } from "./client/api";
 import { DEFAULT_MODELS } from "./constant";
 
@@ -9,13 +11,16 @@ export function trimTopic(topic: string) {
   // This will remove the specified punctuation from the end of the string
   // and also trim quotes from both the start and end if they exist.
   return topic
-    .replace(/^["“”]+|["“”]+$/g, "")
-    .replace(/[，。！？”“"、,.!?]*$/, "");
+    // fix for gemini
+    .replace(/^["“”*]+|["“”*]+$/g, "")
+    .replace(/[，。！？”“"、,.!?*]*$/, "");
 }
+
+const isApp = !!getClientConfig()?.isApp;
 
 export async function copyToClipboard(text: string) {
   try {
-    if (window.__TAURI__) {
+    if (isApp && window.__TAURI__) {
       window.__TAURI__.writeText(text);
     } else {
       await navigator.clipboard.writeText(text);
@@ -37,24 +42,36 @@ export async function copyToClipboard(text: string) {
     document.body.removeChild(textArea);
   }
 }
+//To ensure the expected functionality, the default file format must be JSON.
+export async function downloadAs(text: object, filename: string) {
+  const json = JSON.stringify(text);
+  const blob = new Blob([json], { type: "application/json" });
+  const arrayBuffer = await blob.arrayBuffer();
+  const uint8Array = new Uint8Array(arrayBuffer);
 
-export async function downloadAs(text: string, filename: string) {
-  if (window.__TAURI__) {
-    const result = await window.__TAURI__.dialog.save({
-      defaultPath: `${filename}`,
-      filters: [
-        {
-          name: `${filename.split('.').pop()} files`,
-          extensions: [`${filename.split('.').pop()}`],
-        },
-        {
-          name: "All Files",
-          extensions: ["*"],
-        },
-      ],
-    });
+  try {
+    if (window.__TAURI__) {
+      /**
+       * Fixed client app [Tauri]
+       * Resolved the issue where files couldn't be saved when there was a `:` in the dialog.
+      **/
+      const fileName = filename.replace(/:/g, '');
+      const fileExtension = fileName.split('.').pop();
+      const result = await window.__TAURI__.dialog.save({
+        defaultPath: `${fileName}`,
+        filters: [
+          {
+            name: `${fileExtension} files`,
+            extensions: [`${fileExtension}`],
+          },
+          {
+            name: "All Files",
+            extensions: ["*"],
+          },
+        ],
+      });
 
-    if (result !== null) {
+      if (result !== null) {
       try {
         // await window.__TAURI__.fs.writeBinaryFile(
         //     result,
@@ -69,23 +86,23 @@ export async function downloadAs(text: string, filename: string) {
         showToast(Locale.Download.Failed);
       }
     } else {
-      showToast(Locale.Download.Failed);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `${filename}`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      showToast(Locale.Download.Success);
     }
-  } else {
-    const element = document.createElement("a");
-    element.setAttribute(
-      "href",
-      "data:text/plain;charset=utf-8," + encodeURIComponent(text),
-    );
-    element.setAttribute("download", filename);
-
-    element.style.display = "none";
-    document.body.appendChild(element);
-
-    element.click();
-
-    document.body.removeChild(element);
+  } catch (error) {
+    showToast(Locale.Download.Failed);
   }
+}
+
+// Assuming you have a function to get the provider from the state
+export function getProviderFromState(): string {
+  const accessStore = useAccessStore.getState();
+  return accessStore.provider;
 }
 
 export function compressImage(file: File, maxSize: number): Promise<string> {
@@ -152,7 +169,10 @@ export function readFromFile() {
 
 export function isIOS() {
   const userAgent = navigator.userAgent.toLowerCase();
-  return /iphone|ipad|ipod/.test(userAgent);
+  return (
+    /iphone|ipad|ipod|macintosh/.test(userAgent) ||
+    (userAgent.includes("mac") && "ontouchend" in document)
+  );
 }
 
 export function useWindowSize() {

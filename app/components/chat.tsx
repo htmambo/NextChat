@@ -28,6 +28,8 @@ import PinIcon from "../icons/pin.svg";
 import EditIcon from "../icons/rename.svg";
 import ConfirmIcon from "../icons/confirm.svg";
 import CancelIcon from "../icons/cancel.svg";
+import DownloadIcon from "../icons/download.svg";
+import UploadIcon from "../icons/upload.svg";
 import ImageIcon from "../icons/image.svg";
 
 import LightIcon from "../icons/light.svg";
@@ -36,6 +38,10 @@ import AutoIcon from "../icons/auto.svg";
 import BottomIcon from "../icons/bottom.svg";
 import StopIcon from "../icons/pause.svg";
 import RobotIcon from "../icons/robot.svg";
+import ChatGptIcon from "../icons/chatgpt.png";
+import EyeOnIcon from "../icons/eye.svg";
+import EyeOffIcon from "../icons/eye-off.svg";
+import { debounce, escapeRegExp } from "lodash";
 
 import {
   ChatMessage,
@@ -55,6 +61,8 @@ import {
   selectOrCopy,
   autoGrowTextArea,
   useMobileScreen,
+  downloadAs,
+  readFromFile,
   getMessageTextContent,
   getMessageImages,
   isVisionModel,
@@ -95,7 +103,12 @@ import { prettyObject } from "../utils/format";
 import { ExportMessageModal } from "./exporter";
 import { getClientConfig } from "../config/client";
 import { useAllModels } from "../utils/hooks";
+import { appWindow } from '@tauri-apps/api/window';
+import { sendDesktopNotification } from "../utils/taurinotification";
+import { clearUnfinishedInputForSession, debouncedSave } from "../utils/storageHelper";
 import { MultimodalContent } from "../client/api";
+import Image from 'next/image';
+
 
 const Markdown = dynamic(async () => (await import("./markdown")).Markdown, {
   loading: () => <LoadingIcon />,
@@ -107,12 +120,68 @@ export function SessionConfigModel(props: { onClose: () => void }) {
   const maskStore = useMaskStore();
   const navigate = useNavigate();
 
+  const [exporting, setExporting] = useState(false);
+  const isApp = !!getClientConfig()?.isApp;
+  const isMobileScreen = useMobileScreen();
+
+  const handleExport = async () => {
+    if (exporting) return;
+    setExporting(true);
+    const currentDate = new Date();
+    const currentSession = chatStore.currentSession();
+    const messageCount = currentSession.messages.length;
+    const datePart = isApp
+      ? `${currentDate.toLocaleDateString().replace(/\//g, '_')} ${currentDate.toLocaleTimeString().replace(/:/g, '_')}`
+      : `${currentDate.toLocaleString().replace(/:/g, '_')}`;
+  
+    const formattedMessageCount = Locale.ChatItem.ChatItemCount(messageCount); // Format the message count using the translation function
+    const fileName = `${session.topic}-(${formattedMessageCount})-${datePart}.json`;
+    await downloadAs(session, fileName);
+    setExporting(false);
+  };
+
+  const importchat = async () => {
+    await readFromFile().then((content) => {
+      try {
+        const importedData = JSON.parse(content);
+        chatStore.updateCurrentSession((session) => {
+          Object.assign(session, importedData);
+        });
+      } catch (e) {
+        console.error("[Import] Failed to import JSON file:", e);
+        showToast(Locale.Settings.Sync.ImportFailed);
+      }
+    });
+  };
+
   return (
     <div className="modal-mask">
       <Modal
         title={Locale.Context.Edit}
         onClose={() => props.onClose()}
         actions={[
+          /**
+           * Currently disabled in mobile for export/import
+           **/
+          !isMobileScreen && (
+            <IconButton
+              key="export"
+              icon={<DownloadIcon />}
+              bordered
+              text={Locale.UI.Export}
+              onClick={handleExport}
+              disabled={exporting}
+            />
+          ),
+          !isMobileScreen && (
+            <IconButton
+              key="import"
+              icon={<UploadIcon />}
+              bordered
+              text={Locale.UI.Import}
+              onClick={importchat}
+            />
+          ),
           <IconButton
             key="reset"
             icon={<ResetIcon />}
@@ -386,22 +455,47 @@ function useScrollToBottom() {
   // for auto-scroll
   const scrollRef = useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = useState(true);
+  const userHasScrolledUp = useRef(false);
+
+  function onScroll() {
+    if (!scrollRef.current) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight;
+
+    userHasScrolledUp.current = !isAtBottom;
+  }
 
   function scrollDomToBottom() {
     const dom = scrollRef.current;
-    if (dom) {
-      requestAnimationFrame(() => {
-        setAutoScroll(true);
-        dom.scrollTo(0, dom.scrollHeight);
-      });
+    if (dom && !userHasScrolledUp.current) {
+      dom.scrollTop = dom.scrollHeight;
     }
   }
+
+  const scrollToBottomSmooth = () => {
+    const scrollContainer = scrollRef.current;
+    if (scrollContainer) {
+      const scrollHeight = scrollContainer.scrollHeight;
+      const height = scrollContainer.clientHeight;
+      const maxScrollTop = scrollHeight - height;
+      scrollContainer.scrollTo({ top: maxScrollTop, behavior: 'smooth' });
+    }
+  };
 
   // auto scroll
   useEffect(() => {
     if (autoScroll) {
       scrollDomToBottom();
     }
+    const dom = scrollRef.current;
+    dom?.addEventListener("scroll", onScroll);
+
+    scrollDomToBottom();
+
+    return () => {
+      dom?.removeEventListener("scroll", onScroll);
+    };
   });
 
   return {
@@ -409,6 +503,7 @@ function useScrollToBottom() {
     autoScroll,
     setAutoScroll,
     scrollDomToBottom,
+    scrollToBottomSmooth,
   };
 }
 
@@ -420,6 +515,8 @@ export function ChatActions(props: {
   scrollToBottom: () => void;
   showPromptHints: () => void;
   hitBottom: boolean;
+  showContextPrompts: boolean;
+  toggleContextPrompts: () => void;
   uploading: boolean;
 }) {
   const config = useAppConfig();
@@ -468,7 +565,7 @@ export function ChatActions(props: {
       );
       showToast(nextModel);
     }
-  }, [chatStore, currentModel, models]);
+  }, [props, chatStore, currentModel, models]);
 
   return (
     <div className={styles["chat-input-actions"]}>
@@ -521,6 +618,22 @@ export function ChatActions(props: {
         onClick={props.showPromptHints}
         text={Locale.Chat.InputActions.Prompt}
         icon={<PromptIcon />}
+      />
+
+      <ChatAction
+        onClick={props.toggleContextPrompts}
+        text={
+          props.showContextPrompts
+            ? Locale.Mask.Config.ShowFullChatHistory.UnHide
+            : Locale.Mask.Config.ShowFullChatHistory.Hide
+        }
+        icon={
+          props.showContextPrompts ? (
+            <EyeOffIcon />
+          ) : (
+            <EyeOnIcon />
+          )
+        }
       />
 
       <ChatAction
@@ -636,6 +749,79 @@ export function EditMessageModal(props: { onClose: () => void }) {
   );
 }
 
+function usePinApp(sessionId: string) { // Accept sessionId as a parameter
+  const [pinApp, setPinApp] = useState(false);
+  const isApp = getClientConfig()?.isApp;
+  const config = useAppConfig();
+  const TauriShortcut = config.desktopShortcut;
+  const chatStore = useChatStore();
+  const session = chatStore.currentSession();
+
+  const togglePinApp = useCallback(async () => {
+    if (!isApp) {
+      return;
+    }
+
+    if (pinApp) {
+      await appWindow.setAlwaysOnTop(false);
+      sendDesktopNotification(Locale.Chat.Actions.PinAppContent.UnPinned);
+      showToast(Locale.Chat.Actions.PinAppContent.UnPinned);
+    } else {
+      await appWindow.setAlwaysOnTop(true);
+      sendDesktopNotification(Locale.Chat.Actions.PinAppContent.Pinned);
+      showToast(Locale.Chat.Actions.PinAppContent.Pinned);
+    }
+    setPinApp((prevPinApp) => !prevPinApp);
+  }, [isApp, pinApp]);
+
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === TauriShortcut) {
+        togglePinApp();
+      }
+    };
+    // Usage : Mouse+5,Mouse+4,Mouse+1(Middle Click)
+    // You need to copy-paste (e.g., Mouse+5 paste in settings) instead of typing manually in settings
+    const handleMouseClick = (event: MouseEvent) => {
+      if (event.button === 1 || event.button === 4 || event.button === 5) {
+        togglePinApp();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyPress);
+    document.addEventListener("mousedown", handleMouseClick);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+      document.removeEventListener("mousedown", handleMouseClick);
+    };
+  }, [TauriShortcut, togglePinApp]);
+  // Reset pinApp when the session changes
+  useEffect(() => {
+    setPinApp(false);
+  }, [sessionId]); // Listen for changes to sessionId
+
+  return {
+    pinApp: isApp ? pinApp : false,
+    togglePinApp: isApp ? togglePinApp : () => { },
+  };
+}
+
+// Custom hook for debouncing a function
+function useDebouncedEffect(effect: () => void, deps: any[], delay: number) {
+  // Include `effect` in the dependency array for `useCallback`
+  const callback = useCallback(effect, [effect, ...deps]);
+
+  useEffect(() => {
+    const handler = debounce(callback, delay);
+
+    handler();
+
+    // Cleanup function to cancel the debounced call if the component unmounts
+    return () => handler.cancel();
+  }, [callback, delay]); // `callback` already includes `effect` in its dependencies, so no need to add it here again.
+}
+
 export function DeleteImageButton(props: { deleteImage: () => void }) {
   return (
     <div className={styles["delete-image"]} onClick={props.deleteImage}>
@@ -662,6 +848,8 @@ function _Chat() {
   const [hitBottom, setHitBottom] = useState(true);
   const isMobileScreen = useMobileScreen();
   const navigate = useNavigate();
+  const { pinApp, togglePinApp } = usePinApp(session.id);
+  const isApp = getClientConfig()?.isApp;
   const [attachImages, setAttachImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
 
@@ -698,18 +886,76 @@ function _Chat() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(measure, [userInput]);
 
+  const loadchat = () => {
+    readFromFile().then((content) => {
+      try {
+        const importedData = JSON.parse(content);
+        chatStore.updateCurrentSession((session) => {
+          Object.assign(session, importedData);
+          // Set any other properties you want to update in the session
+        });
+      } catch (e) {
+        console.error("[Import] Failed to import JSON file:", e);
+        showToast(Locale.Settings.Sync.ImportFailed);
+      }
+    });
+  };
+  
   // chat commands shortcuts
   const chatCommands = useChatCommand({
     new: () => chatStore.newSession(),
     newm: () => navigate(Path.NewChat),
     prev: () => chatStore.nextSession(-1),
     next: () => chatStore.nextSession(1),
+    restart: () => window.__TAURI__?.process.relaunch(),
     clear: () =>
       chatStore.updateCurrentSession(
         (session) => (session.clearContextIndex = session.messages.length),
       ),
     del: () => chatStore.deleteSession(chatStore.currentSessionIndex),
-  });
+    save: () =>
+      downloadAs((session), `${session.topic}.json`),
+    load: loadchat,
+    copymemoryai: () => {
+      const memoryPrompt = chatStore.currentSession().memoryPrompt;
+      if (memoryPrompt.trim() !== "") {
+        copyToClipboard(memoryPrompt);
+        showToast(Locale.Copy.Success);
+      } else {
+        showToast(Locale.Copy.Failed);
+      }
+    },
+    updatemasks: () => {
+      chatStore.updateCurrentSession((session) => {
+        const memoryPrompt = session.memoryPrompt;
+        const currentDate = new Date().toLocaleString(); // Get the current date and time as a string
+        const existingContext = session.mask.context;
+        let currentContext = existingContext[0]; // Get the current context message
+    
+        if (!currentContext || currentContext.role !== "system") {
+          // If the current context message doesn't exist or doesn't have the role "system"
+          currentContext = {
+            role: "system",
+            content: memoryPrompt,
+            date: currentDate,
+            id: "", // Generate or set the ID for the new message
+            // Add any other properties you want to set for the context messages
+          };
+          existingContext.unshift(currentContext); // Add the new message at the beginning of the context array
+          showToast(Locale.Chat.Commands.UI.MasksSuccess);
+        } else {
+          // If the current context message already exists and has the role "system"
+          currentContext.content = memoryPrompt; // Update the content
+          currentContext.date = currentDate; // Update the date
+          // You can update other properties of the current context message here
+        }
+    
+        // Set any other properties you want to update in the session
+        session.mask.context = existingContext;
+        showToast(Locale.Chat.Commands.UI.MasksSuccess);
+      });
+    },
+  });  
 
   // only search prompts when user input is short
   const SEARCH_TEXT_LIMIT = 30;
@@ -733,7 +979,12 @@ function _Chat() {
 
   const doSubmit = (userInput: string) => {
     if (userInput.trim() === "") return;
-    const matchCommand = chatCommands.match(userInput);
+
+    // reduce a zod cve CVE-2023-4316
+    const escapedInput = escapeRegExp(userInput);
+
+    const matchCommand = chatCommands.match(escapedInput);
+
     if (matchCommand.matched) {
       setUserInput("");
       setPromptHints([]);
@@ -745,7 +996,6 @@ function _Chat() {
       .onUserInput(userInput, attachImages)
       .then(() => setIsLoading(false));
     setAttachImages([]);
-    localStorage.setItem(LAST_INPUT_KEY, userInput);
     setUserInput("");
     setPromptHints([]);
     if (!isMobileScreen) inputRef.current?.focus();
@@ -911,21 +1161,25 @@ function _Chat() {
     });
   };
 
-  const context: RenderMessage[] = useMemo(() => {
-    return session.mask.hideContext ? [] : session.mask.context.slice();
-  }, [session.mask.context, session.mask.hideContext]);
   const accessStore = useAccessStore();
+  const isAuthorized = accessStore.isAuthorized();
+  const context: RenderMessage[] = useMemo(() => {
+    const contextMessages = session.mask.hideContext ? [] : session.mask.context.slice();
 
-  if (
-    context.length === 0 &&
-    session.messages.at(0)?.content !== BOT_HELLO.content
-  ) {
-    const copiedHello = Object.assign({}, BOT_HELLO);
-    if (!accessStore.isAuthorized()) {
-      copiedHello.content = Locale.Error.Unauthorized;
+    if (
+      contextMessages.length === 0 &&
+      session.messages.at(0)?.role !== "system"
+    ) {
+      const copiedHello = Object.assign({}, BOT_HELLO);
+      if (!isAuthorized) {
+        copiedHello.role = "system";
+        copiedHello.content = Locale.Error.Unauthorized;
+      }
+      contextMessages.push(copiedHello);
     }
-    context.push(copiedHello);
-  }
+
+    return contextMessages;
+  }, [session.mask.context, session.mask.hideContext, session.messages, isAuthorized]);
 
   // preview messages
   const renderMessages = useMemo(() => {
@@ -965,14 +1219,16 @@ function _Chat() {
     userInput,
   ]);
 
-  const [msgRenderIndex, _setMsgRenderIndex] = useState(
+  // At the top level of the component
+  // this should be fix a stupid react warning that sometimes its fucking incorrect
+  const [msgRenderIndex, _setMsgRenderIndex] = useState<number>(
     Math.max(0, renderMessages.length - CHAT_PAGE_SIZE),
   );
-  function setMsgRenderIndex(newIndex: number) {
+  const setMsgRenderIndex = useCallback((newIndex: number) => {
     newIndex = Math.min(renderMessages.length - CHAT_PAGE_SIZE, newIndex);
     newIndex = Math.max(0, newIndex);
     _setMsgRenderIndex(newIndex);
-  }
+  }, [renderMessages.length, _setMsgRenderIndex]);
 
   const messages = useMemo(() => {
     const endRenderIndex = Math.min(
@@ -982,17 +1238,19 @@ function _Chat() {
     return renderMessages.slice(msgRenderIndex, endRenderIndex);
   }, [msgRenderIndex, renderMessages]);
 
-  const onChatBodyScroll = (e: HTMLElement) => {
-    const bottomHeight = e.scrollTop + e.clientHeight;
-    const edgeThreshold = e.clientHeight;
+  const onChatBodyScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget; // Use currentTarget instead of target
+    const bottomHeight = target.scrollTop + target.clientHeight;
+    const edgeThreshold = target.clientHeight;
 
-    const isTouchTopEdge = e.scrollTop <= edgeThreshold;
-    const isTouchBottomEdge = bottomHeight >= e.scrollHeight - edgeThreshold;
-    const isHitBottom =
-      bottomHeight >= e.scrollHeight - (isMobileScreen ? 4 : 10);
+    // Determine if the user is at the top or bottom edge of the chat.
+    const isTouchTopEdge = target.scrollTop <= edgeThreshold;
+    const isTouchBottomEdge = bottomHeight >= target.scrollHeight - edgeThreshold;
+    const isHitBottom = bottomHeight >= target.scrollHeight - (isMobileScreen ? 4 : 10);
 
-    const prevPageMsgIndex = msgRenderIndex - CHAT_PAGE_SIZE;
+    
     const nextPageMsgIndex = msgRenderIndex + CHAT_PAGE_SIZE;
+    const prevPageMsgIndex = msgRenderIndex - CHAT_PAGE_SIZE;
 
     if (isTouchTopEdge && !isTouchBottomEdge) {
       setMsgRenderIndex(prevPageMsgIndex);
@@ -1002,7 +1260,31 @@ function _Chat() {
 
     setHitBottom(isHitBottom);
     setAutoScroll(isHitBottom);
-  };
+  }, [
+    setHitBottom,
+    setAutoScroll,
+    isMobileScreen,
+    msgRenderIndex,
+    setMsgRenderIndex, // Added setMsgRenderIndex
+  ]);
+
+  // Use the custom hook to debounce the onChatBodyScroll function
+  useDebouncedEffect(() => {
+    const scrollContainer = scrollRef.current;
+    const handleScrollEvent = (event: Event) => {
+      onChatBodyScroll(event as unknown as React.UIEvent<HTMLDivElement>);
+    };
+
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleScrollEvent);
+    }
+
+    return () => {
+      if (scrollContainer) {
+        scrollContainer.removeEventListener('scroll', handleScrollEvent);
+      }
+    };
+  }, [onChatBodyScroll], 100);
 
   function scrollToBottom() {
     setMsgRenderIndex(renderMessages.length - CHAT_PAGE_SIZE);
@@ -1023,12 +1305,21 @@ function _Chat() {
   const showMaxIcon = !isMobileScreen && !clientConfig?.isApp;
 
   useCommand({
-    fill: setUserInput,
+    fill: (text) => {
+      // Call setUserInput only if text is a string
+      if (text !== undefined) {
+        setUserInput(text);
+      }
+    },
     submit: (text) => {
-      doSubmit(text);
+      // Call doSubmit only if text is a string
+      if (text !== undefined) {
+        doSubmit(text);
+      }
     },
     code: (text) => {
-      if (accessStore.disableFastLink) return;
+      // Exit if fast link is disabled or text is undefined
+      if (accessStore.disableFastLink || text === undefined) return;
       console.log("[Command] got code from url: ", text);
       showConfirm(Locale.URLCommand.Code + `code = ${text}`).then((res) => {
         if (res) {
@@ -1037,7 +1328,7 @@ function _Chat() {
       });
     },
     settings: (text) => {
-      if (accessStore.disableFastLink) return;
+      if (accessStore.disableFastLink || typeof text !== 'string') return;
 
       try {
         const payload = JSON.parse(text) as {
@@ -1047,22 +1338,22 @@ function _Chat() {
 
         console.log("[Command] got settings from url: ", payload);
 
-        if (payload.key || payload.url) {
-          showConfirm(
-            Locale.URLCommand.Settings +
-              `\n${JSON.stringify(payload, null, 4)}`,
-          ).then((res) => {
-            if (!res) return;
-            if (payload.key) {
-              accessStore.update(
-                (access) => (access.openaiApiKey = payload.key!),
-              );
+        showConfirm(
+          Locale.URLCommand.Settings +
+          `\n${JSON.stringify(payload, null, 4)}`,
+        ).then((res) => {
+          if (!res) return;
+          accessStore.update((access) => {
+            // Only update openaiApiKey if payload.key is a string
+            if (typeof payload.key === 'string') {
+              access.openaiApiKey = payload.key;
             }
-            if (payload.url) {
-              accessStore.update((access) => (access.openaiUrl = payload.url!));
+            // Only update openaiUrl if payload.url is a string
+            if (typeof payload.url === 'string') {
+              access.openaiUrl = payload.url;
             }
           });
-        }
+        });
       } catch {
         console.error("[Command] failed to get settings from url: ", text);
       }
@@ -1072,22 +1363,78 @@ function _Chat() {
   // edit / insert message modal
   const [isEditingMessage, setIsEditingMessage] = useState(false);
 
+  // TODO: The final improvement needed is to fix the "UNFINISHED_INPUT" overwriting issue that occurs when a user clicks 'start new conversation'. 
+  // After this, I will return to working on the backend with Golang.
+
+  // useRef is used to persist the previous session ID across renders without triggering a re-render.
+  const previousSessionIdRef = useRef(session.id);
+
+  useEffect(() => {
+    // Retrieve the previous session ID stored in the ref.
+    const previousSessionId = previousSessionIdRef.current;
+
+    // Check if the previous session ID is no longer present in the chat store.
+    // If it's not, it indicates that the session has been deleted and we should clear the unfinished input.
+    if (!chatStore.sessions.some(s => s.id === previousSessionId)) {
+      clearUnfinishedInputForSession(previousSessionId);
+    }
+
+    // Update the ref with the new session ID for the next render.
+    previousSessionIdRef.current = session.id;
+
+    // This cleanup function will be called when the component unmounts or when the dependencies of the effect change.
+    // It ensures that the unfinished input for the current session is cleared if the component unmounts
+    // or if the session is deleted from the chat store.
+    return () => {
+      clearUnfinishedInputForSession(session.id);
+    };
+    // The effect depends on session.id and chatStore.sessions to determine when to run.
+    // It should run when the session ID changes or when the list of sessions in the chat store updates.
+  }, [session.id, chatStore.sessions]);
+
+  // Define the key for storing unfinished input based on the session ID outside of the useEffect.
+  const key = UNFINISHED_INPUT(session.id);
+
+  // Define a function that calls the debounced function, wrapped in useCallback.
+  const saveUnfinishedInput = useCallback((input: string) => {
+    debouncedSave(input, key);
+  }, [key]);
+
+  // Call the save function whenever userInput changes.
   // remember unfinished input
   useEffect(() => {
-    // try to load from local storage
-    const key = UNFINISHED_INPUT(session.id);
+    saveUnfinishedInput(userInput);
+  }, [userInput, saveUnfinishedInput]);
+
+  // Load unfinished input when the component mounts or session ID changes.
+  useEffect(() => {
     const mayBeUnfinishedInput = localStorage.getItem(key);
     if (mayBeUnfinishedInput && userInput.length === 0) {
       setUserInput(mayBeUnfinishedInput);
-      localStorage.removeItem(key);
+      // Optionally clear the unfinished input from local storage after loading it.
+      // Note: The removal of "localStorage.removeItem(key);" here is intentional. 
+      // The preservation of input is already handled by the debounced function, which simplifies the stupid complexity.
     }
 
-    const dom = inputRef.current;
+    // Capture the current value of the input reference.
+    const currentInputRef = inputRef.current;
+
+    // This cleanup function will run when the component unmounts or the session.id changes.
     return () => {
-      localStorage.setItem(key, dom?.value ?? "");
+      // Save the current input to local storage only if it is not a command.
+      // Use the captured value from the input reference.
+      const currentInputValue = currentInputRef?.value ?? "";
+      // Save the input to local storage only if it's not empty and not a command.
+      if (currentInputValue && !currentInputValue.startsWith(ChatCommandPrefix)) {
+        localStorage.setItem(key, currentInputValue);
+      } else {
+        // If there's no value, ensure we don't create an empty key in local storage.
+        localStorage.removeItem(key);
+      }
     };
+    // The effect should depend on the session ID to ensure it runs when the session changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [session.id]);
 
   async function uploadImage() {
     const images: string[] = [];
@@ -1133,6 +1480,17 @@ function _Chat() {
     }
     setAttachImages(images);
   }
+
+  // this now better
+  const scrollToBottomSmooth = () => {
+    const scrollContainer = scrollRef.current;
+    if (scrollContainer) {
+      const scrollHeight = scrollContainer.scrollHeight;
+      const height = scrollContainer.clientHeight;
+      const maxScrollTop = scrollHeight - height;
+      scrollContainer.scrollTo({ top: maxScrollTop, behavior: 'smooth' });
+    }
+  };
 
   return (
     <div className={styles.chat} key={session.id}>
@@ -1180,7 +1538,17 @@ function _Chat() {
                 setShowExport(true);
               }}
             />
-          </div>
+            </div>
+          {!showMaxIcon && isApp ? (
+            <div className="window-action-button">
+              <IconButton
+                icon={<PinIcon />}
+                bordered
+                title={Locale.Chat.Actions.Pin}
+                onClick={togglePinApp} // Call the enablePinApp function
+              />
+            </div>
+          ) : null}
           {showMaxIcon && (
             <div className="window-action-button">
               <IconButton
@@ -1206,7 +1574,7 @@ function _Chat() {
       <div
         className={styles["chat-body"]}
         ref={scrollRef}
-        onScroll={(e) => onChatBodyScroll(e.currentTarget)}
+        onScroll={onChatBodyScroll} // Pass the event directly
         onMouseDown={() => inputRef.current?.blur()}
         onTouchStart={() => {
           inputRef.current?.blur();
@@ -1216,6 +1584,9 @@ function _Chat() {
         {messages.map((message, i) => {
           const isUser = message.role === "user";
           const isContext = i < context.length;
+          const isAssistant = message.role === "assistant";
+          const isDallEModel = session.mask.modelConfig.model.startsWith("dall-e");
+
           const showActions =
             i > 0 &&
             !(message.preview || message.content.length === 0) &&
@@ -1270,6 +1641,8 @@ function _Chat() {
                       </div>
                       {isUser ? (
                         <Avatar avatar={config.avatar} />
+                      ) : isContext ? (
+                        <Avatar avatar="1f4ab" /> // Add this line for system messages
                       ) : (
                         <>
                           {["system"].includes(message.role) ? (
@@ -1329,11 +1702,13 @@ function _Chat() {
                       </div>
                     )}
                   </div>
-                  {showTyping && (
+                  {showTyping && (isAssistant || isUser) ? (
                     <div className={styles["chat-message-status"]}>
-                      {Locale.Chat.Typing}
+                      {isAssistant && isDallEModel
+                        ? Locale.Chat.GeneratingImage
+                        : Locale.Chat.Typing}
                     </div>
-                  )}
+                  ) : null}
                   <div className={styles["chat-message-item"]}>
                     <Markdown
                       content={getMessageTextContent(message)}
@@ -1352,10 +1727,11 @@ function _Chat() {
                       defaultShow={i >= messages.length - 6}
                     />
                     {getMessageImages(message).length == 1 && (
-                      <img
+                      <Image
                         className={styles["chat-message-item-image"]}
                         src={getMessageImages(message)[0]}
                         alt=""
+                        layout="responsive"
                       />
                     )}
                     {getMessageImages(message).length > 1 && (
@@ -1369,13 +1745,14 @@ function _Chat() {
                       >
                         {getMessageImages(message).map((image, index) => {
                           return (
-                            <img
+                            <Image
                               className={
                                 styles["chat-message-item-image-multi"]
                               }
                               key={index}
                               src={image}
                               alt=""
+                              layout="responsive"
                             />
                           );
                         })}
@@ -1404,7 +1781,7 @@ function _Chat() {
           setAttachImages={setAttachImages}
           setUploading={setUploading}
           showPromptModal={() => setShowPromptModal(true)}
-          scrollToBottom={scrollToBottom}
+          scrollToBottom={scrollToBottomSmooth}
           hitBottom={hitBottom}
           uploading={uploading}
           showPromptHints={() => {
@@ -1418,6 +1795,8 @@ function _Chat() {
             setUserInput("/");
             onSearch("");
           }}
+          showContextPrompts={false}
+          toggleContextPrompts={() => showToast(Locale.WIP)}
         />
         <label
           className={`${styles["chat-input-panel-inner"]} ${

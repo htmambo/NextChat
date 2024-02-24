@@ -88,7 +88,12 @@ const sk: PartialLocaleType = {
     Copy: "Kopírovať všetko",
     Download: "Stiahnuť",
     MessageFromYou: "Správa od vás",
-    MessageFromChatGPT: "Správa od ChatGPT",
+    MessageFromChatGPT: {
+      NoRole: "Správa od ChatGPT",
+      RoleAssistant: "Asistent",
+      RoleSystem: "Systém",
+      SysMemoryPrompt: "Výzva systémovej pamäte",
+    },
     Share: "Zdieľať na ShareGPT",
     Format: {
       Title: "Formát exportu",
@@ -179,6 +184,10 @@ const sk: PartialLocaleType = {
       Title: "Bublina náhľadu odoslania",
       SubTitle: "Náhľad markdownu v bubline",
     },
+    AutoScrollMessage: {
+      Title: "Odpoveď s automatickým posúvaním",
+      SubTitle: "Posúvať správu počas odpovedania",
+    },
     AutoGenerateTitle: {
       Title: "Automaticky generovať názov",
       SubTitle: "Generovať vhodný názov na základe obsahu konverzácie",
@@ -208,9 +217,23 @@ const sk: PartialLocaleType = {
         },
 
         WebDav: {
-          Endpoint: "Koncový bod WebDAV",
-          UserName: "Meno používateľa",
-          Password: "Heslo",
+          Endpoint: {
+            Name: "WebDav Koncový Bod",
+            SubTitle: "Nastavenie WebDav Koncového Bodu",
+          },
+          UserName: {
+            Name: "Používateľské Meno",
+            SubTitle: "Nastavenie Používateľského Meno",
+          },
+          Password: {
+            Name: "Heslo",
+            SubTitle: "Nastavenie Hesla",
+          },
+          FileName: {
+            Name: "Názov Súboru",
+            SubTitle:
+              "Názov súboru, napríklad: backtrackz.json (musí byť JSON súbor)",
+          },
         },
 
         UpStash: {

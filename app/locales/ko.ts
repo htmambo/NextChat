@@ -42,7 +42,12 @@ const ko: PartialLocaleType = {
     Copy: "모두 복사",
     Download: "다운로드",
     MessageFromYou: "나의 메시지",
-    MessageFromChatGPT: "ChatGPT의 메시지",
+    MessageFromChatGPT: {
+      NoRole: "ChatGPT에서의 메시지",
+      RoleAssistant: "어시스턴트",
+      RoleSystem: "시스템",
+      SysMemoryPrompt: "시스템 메모리 프롬프트",
+    },
   },
   Memory: {
     Title: "기억 프롬프트",
@@ -92,6 +97,10 @@ const ko: PartialLocaleType = {
       Title: "미리 보기 버블 전송",
       SubTitle: "버블에서 마크다운 미리 보기",
     },
+    AutoScrollMessage: {
+      Title: "자동 스크롤 답장",
+      SubTitle: "답장하는 동안 메시지 스크롤",
+    },
     Mask: {
       Splash: {
         Title: "마스크 시작 화면",
@@ -128,11 +137,14 @@ const ko: PartialLocaleType = {
     Usage: {
       Title: "계정 잔액",
       SubTitle(used: any, total: any) {
-        return `이번 달 사용액 ${used}, 구독액 ${total}`;
+        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "알 수 없음";
+        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "알 수 없음";
+        const usedFormatted = new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'USD' }).format(used);
+        return `이번 달 사용 금액: ${usedFormatted}, 하드 리미트: ${hardLimitusd}, 승인된 사용 한도: ${hardLimit}`;
       },
       IsChecking: "확인 중...",
       Check: "확인",
-      NoAccess: "잔액 확인을 위해 API 키를 입력하세요.",
+      NoAccess: `잔액을 확인하려면, API 키에 "sess-" 접두사로 시작하는 세션 키를 입력하세요.`,
     },
 
     Model: "모델",
@@ -181,6 +193,10 @@ const ko: PartialLocaleType = {
   FineTuned: {
     Sysmessage: "당신은 어시스턴트입니다",
   },
+  PrivacyPage: {
+    Name: "プライバシー",
+    Confirm: "同意する",
+  },
   Mask: {
     Name: "마스크",
     Page: {
@@ -224,6 +240,7 @@ const ko: PartialLocaleType = {
     Cancel: "취소",
     Close: "닫기",
     Create: "생성",
+    Continue: "계속",
     Edit: "편집",
   },
   Exporter: {

@@ -43,13 +43,17 @@
         "show": true,
         "startDragging": true,
         "unmaximize": true,
-        "unminimize": true
+        "unminimize": true,
+        "setAlwaysOnTop": true
       },
       "fs": {
         "all": true
       },
       "notification": {
         "all": true
+      },
+      "process": {
+        "relaunch": true
       }
     },
     "bundle": {
@@ -108,7 +112,8 @@
         "title": "NextChat",
         "width": 960,
         "hiddenTitle": true,
-        "titleBarStyle": "Overlay"
+        "titleBarStyle": "Overlay",
+        "alwaysOnTop": false
       }
     ]
   }

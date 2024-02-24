@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 
 import styles from "./settings.module.scss";
 
@@ -40,6 +40,9 @@ import {
   useUpdateStore,
   useAccessStore,
   useAppConfig,
+  ChatSession,
+  ShortcutValidator,
+  speed_animationValidator,
 } from "../store";
 
 import Locale, {
@@ -48,7 +51,11 @@ import Locale, {
   changeLang,
   getLang,
 } from "../locales";
-import { copyToClipboard } from "../utils";
+import { 
+  copyToClipboard,
+  downloadAs,
+  readFromFile,
+} from "../utils";
 import Link from "next/link";
 import {
   Azure,
@@ -268,7 +275,7 @@ function CheckButton() {
   const syncStore = useSyncStore();
 
   const couldCheck = useMemo(() => {
-    return syncStore.cloudSync();
+    return syncStore.countSync();
   }, [syncStore]);
 
   const [checkState, setCheckState] = useState<
@@ -295,10 +302,8 @@ function CheckButton() {
           <LoadingIcon />
         ) : checkState === "success" ? (
           <CloudSuccessIcon />
-        ) : checkState === "failed" ? (
-          <CloudFailIcon />
         ) : (
-          <ConnectionIcon />
+          <CloudFailIcon />
         )
       }
     ></IconButton>
@@ -376,12 +381,43 @@ function SyncConfigModal(props: { onClose?: () => void }) {
               ></input>
             </ListItem>
           ) : null}
+          <ListItem
+            title={Locale.Settings.Sync.Config.AccessControl.Title}
+            subTitle={Locale.Settings.Sync.Config.AccessControl.SubTitle}
+          >
+            <input
+              type="checkbox"
+              checked={syncStore.enableAccessControl}
+              onChange={(e) => {
+                syncStore.update(
+                  (config) =>
+                    (config.enableAccessControl = e.currentTarget.checked),
+                );
+              }}
+            ></input>
+          </ListItem>
+          <ListItem
+            title={Locale.Settings.Sync.Config.LockClient.Title}
+            subTitle={Locale.Settings.Sync.Config.LockClient.SubTitle}
+          >
+            <input
+              type="checkbox"
+              checked={syncStore.lockclient}
+              onChange={(e) => {
+                syncStore.update(
+                  (config) => (config.lockclient = e.currentTarget.checked),
+                );
+              }}
+            ></input>
+          </ListItem>
         </List>
 
         {syncStore.provider === ProviderType.WebDAV && (
           <>
             <List>
-              <ListItem title={Locale.Settings.Sync.Config.WebDav.Endpoint}>
+              <ListItem
+                title={Locale.Settings.Sync.Config.WebDav.Endpoint.Name}
+              >
                 <input
                   type="text"
                   value={syncStore.webdav.endpoint}
@@ -394,7 +430,9 @@ function SyncConfigModal(props: { onClose?: () => void }) {
                 ></input>
               </ListItem>
 
-              <ListItem title={Locale.Settings.Sync.Config.WebDav.UserName}>
+              <ListItem
+                title={Locale.Settings.Sync.Config.WebDav.UserName.Name}
+              >
                 <input
                   type="text"
                   value={syncStore.webdav.username}
@@ -406,7 +444,9 @@ function SyncConfigModal(props: { onClose?: () => void }) {
                   }}
                 ></input>
               </ListItem>
-              <ListItem title={Locale.Settings.Sync.Config.WebDav.Password}>
+              <ListItem
+                title={Locale.Settings.Sync.Config.WebDav.Password.Name}
+              >
                 <PasswordInput
                   value={syncStore.webdav.password}
                   onChange={(e) => {
@@ -416,6 +456,21 @@ function SyncConfigModal(props: { onClose?: () => void }) {
                     );
                   }}
                 ></PasswordInput>
+              </ListItem>
+              <ListItem
+                title={Locale.Settings.Sync.Config.WebDav.FileName.Name}
+                subTitle={Locale.Settings.Sync.Config.WebDav.FileName.SubTitle}
+              >
+                <input
+                  type="text"
+                  value={syncStore.webdav.filename}
+                  onChange={(e) => {
+                    syncStore.update(
+                      (config) =>
+                        (config.webdav.filename = e.currentTarget.value),
+                    );
+                  }}
+                ></input>
               </ListItem>
             </List>
           </>
@@ -461,6 +516,263 @@ function SyncConfigModal(props: { onClose?: () => void }) {
             </ListItem>
           </List>
         )}
+        {syncStore.provider === ProviderType.GitHubGist && (
+          <>
+            <List>
+              <ListItem
+                title={Locale.Settings.Sync.Config.GithubGist.GistID.Name}
+                subTitle={
+                  Locale.Settings.Sync.Config.GithubGist.GistID.SubTitle
+                }
+              >
+                <input
+                  type="text"
+                  value={syncStore.githubGist.gistId}
+                  onChange={(e) => {
+                    syncStore.update(
+                      (config) =>
+                        (config.githubGist.gistId = e.currentTarget.value),
+                    );
+                  }}
+                ></input>
+              </ListItem>
+
+              <ListItem
+                title={Locale.Settings.Sync.Config.GithubGist.FileName.Name}
+                subTitle={
+                  Locale.Settings.Sync.Config.GithubGist.FileName.SubTitle
+                }
+              >
+                <input
+                  type="text"
+                  value={syncStore.githubGist.filename}
+                  onChange={(e) => {
+                    syncStore.update(
+                      (config) =>
+                        (config.githubGist.filename = e.currentTarget.value),
+                    );
+                  }}
+                ></input>
+              </ListItem>
+              <ListItem
+                title={Locale.Settings.Sync.Config.GithubGist.AccessToken.Name}
+                subTitle={
+                  Locale.Settings.Sync.Config.GithubGist.AccessToken.SubTitle
+                }
+              >
+                <PasswordInput
+                  value={syncStore.githubGist.token}
+                  onChange={(e) => {
+                    syncStore.update(
+                      (config) =>
+                        (config.githubGist.token = e.currentTarget.value),
+                    );
+                  }}
+                ></PasswordInput>
+              </ListItem>
+            </List>
+          </>
+        )}
+        {syncStore.provider === ProviderType.GoSync && (
+          <List>
+            <ListItem title={Locale.WIP}></ListItem>
+          </List>
+        )}
+      </Modal>
+    </div>
+  );
+}
+/** 
+ * Manage Local Data
+ * Author : @H0llyW00dzZ
+ * WIP
+ **/
+
+function LocalDataModal(props: { onClose?: () => void }) {
+  const [showLocalData, setShowLocalData] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const chatStore = useChatStore();
+  const promptStore = usePromptStore();
+  const maskStore = useMaskStore();
+  const builtinCount = SearchService.count.builtin;
+  const customCount = promptStore.getUserPrompts().length ?? 0;
+  const stateOverview = useMemo(() => {
+    const sessions = chatStore.sessions;
+    const messageCount = sessions.reduce((p, c) => p + c.messages.length, 0);
+
+    return {
+      chat: sessions.length,
+      message: messageCount,
+      prompt: Object.keys(promptStore.prompts).length,
+      mask: Object.keys(maskStore.masks).length,
+    };
+  }, [chatStore.sessions, maskStore.masks, promptStore.prompts]);
+
+  const handleExportChat = async () => {
+    if (exporting) return;
+    setExporting(true);
+    const currentDate = new Date();
+    const sessions = chatStore.sessions;
+    const totalMessageCount = sessions.reduce((count, session) => count + session.messages.length, 0);
+    const datePart = getClientConfig()?.isApp
+      ? `${currentDate.toLocaleDateString().replace(/\//g, '_')} ${currentDate.toLocaleTimeString().replace(/:/g, '_')}`
+      : `${currentDate.toLocaleString().replace(/:/g, '_')}`;
+    const formattedMessageCount = Locale.ChatItem.ChatItemCount(totalMessageCount);
+    const fileName = `(${formattedMessageCount})-${datePart}.json`;
+    await downloadAs(sessions, fileName);
+    setExporting(false);
+  };
+
+  const chatStoreRef = useRef(chatStore);
+
+  const handleImportChat = useMemo(
+    () => async () => {
+      await readFromFile().then((content) => {
+        try {
+          const importedData = JSON.parse(content);
+          const sessions = importedData.map((sessionData: ChatSession) => ({
+            ...sessionData,
+            id: nanoid(),
+          }));
+          chatStoreRef.current.sessions = sessions; // Update the sessions using the ref
+          showToast(Locale.Settings.Sync.ImportChatSuccess);
+        } catch (e) {
+          showToast(Locale.Settings.Sync.ImportFailed);
+          console.error(e);
+        }
+      });
+    },
+    [chatStoreRef]
+  );
+
+  const handleExportPrompts = async () => {
+    if (exporting) return;
+    setExporting(true);
+    const currentDate = new Date();
+    const prompts = promptStore.prompts;
+    const promptCount = Object.keys(prompts).length;
+    const datePart = getClientConfig()?.isApp
+      ? `${currentDate.toLocaleDateString().replace(/\//g, '_')} ${currentDate.toLocaleTimeString().replace(/:/g, '_')}`
+      : `${currentDate.toLocaleString().replace(/:/g, '_')}`;
+    const fileName = `prompts_${promptCount}_${datePart}.json`;
+    await downloadAs(prompts, fileName);
+    setExporting(false);
+  };
+// Fix Warning while building into a binary (desktop app known as tauri)
+  const handleImportPrompts = useMemo(
+    () => async () => {
+      await readFromFile().then((content) => {
+        try {
+          const importedData = JSON.parse(content);
+          promptStore.prompts = importedData; // Update the prompts in the store
+          showToast(Locale.Settings.Sync.ImportPromptsSuccess);
+        } catch (e) {
+          showToast(Locale.Settings.Sync.ImportFailed);
+          console.error(e);
+        }
+      });
+    },
+    // promptStore should be included in the dependency array
+    [promptStore]
+  );
+
+  return (
+    <div className="modal-mask">
+      <Modal
+        title={Locale.Settings.Sync.LocalState}
+        onClose={() => props.onClose?.()}
+        actions={[
+          <CheckButton key="check" />,
+          <IconButton
+            key="confirm"
+            onClick={props.onClose}
+            icon={<ConfirmIcon />}
+            bordered
+            text={Locale.UI.Confirm}
+          />,
+        ]}
+      >
+        <List>
+          <ListItem
+            title={Locale.Settings.Sync.Description.Chat(stateOverview).title}
+            subTitle={Locale.Settings.Sync.Description.Chat(stateOverview).description}
+          >
+            <div style={{ display: "flex" }}>
+              <IconButton
+                icon={<UploadIcon />}
+                text={Locale.UI.Export}
+                onClick={handleExportChat}
+              />
+              <IconButton
+                icon={<DownloadIcon />}
+                text={Locale.UI.Import}
+                onClick={handleImportChat}
+              />
+              <IconButton
+                icon={<ClearIcon />}
+                text={Locale.Settings.Danger.Clear.Action}
+                onClick={async () => {
+                  if (await showConfirm(Locale.Settings.Danger.Clear.Confirm)) {
+                    chatStore.clearChatData();
+                  }
+                }}
+              />
+            </div>
+          </ListItem>
+          <ListItem
+            title={Locale.Settings.Sync.Description.Masks(stateOverview).title}
+            subTitle={Locale.Settings.Sync.Description.Masks(stateOverview).description}
+          >
+            <div style={{ display: "flex" }}>
+              <IconButton
+                icon={<UploadIcon />}
+                text={Locale.UI.Export}
+                onClick={() => {
+                  showToast(Locale.WIP);
+                }}
+              />
+              <IconButton
+                icon={<DownloadIcon />}
+                text={Locale.UI.Import}
+                onClick={() => {
+                  showToast(Locale.WIP);
+                }}
+              />
+            </div>
+          </ListItem>
+          <ListItem
+            title={Locale.Settings.Sync.Description.Prompt(stateOverview).title}
+            subTitle={Locale.Settings.Prompt.ListCount(
+              builtinCount,
+              customCount,
+            )}
+          >
+            <div style={{ display: "flex" }}>
+              <IconButton
+                icon={<UploadIcon />}
+                text={Locale.UI.Export}
+                onClick={handleExportPrompts}
+              />
+              <IconButton
+                icon={<DownloadIcon />}
+                text={Locale.UI.Import}
+                onClick={handleImportPrompts}
+              />
+              <IconButton
+                icon={<ClearIcon />}
+                text={Locale.Settings.Danger.Clear.Action}
+                onClick={async () => {
+                  if (await showConfirm(Locale.Settings.Danger.Clear.Confirm)) {
+                    promptStore.clearUserPrompts();
+                  }
+                }}
+              />
+            </div>
+          </ListItem>
+        </List>
+        {showLocalData && (
+          <LocalDataModal onClose={() => setShowLocalData(false)} />
+        )}
       </Modal>
     </div>
   );
@@ -472,10 +784,11 @@ function SyncItems() {
   const promptStore = usePromptStore();
   const maskStore = useMaskStore();
   const couldSync = useMemo(() => {
-    return syncStore.cloudSync();
+    return syncStore.countSync();
   }, [syncStore]);
 
   const [showSyncConfigModal, setShowSyncConfigModal] = useState(false);
+  const [showLocalData, setShowLocalData] = useState(false);
 
   const stateOverview = useMemo(() => {
     const sessions = chatStore.sessions;
@@ -534,6 +847,13 @@ function SyncItems() {
         >
           <div style={{ display: "flex" }}>
             <IconButton
+              icon={<EditIcon />}
+              text={Locale.UI.Manage}
+              onClick={() => {
+                setShowLocalData(true);
+              }}
+            />
+            <IconButton
               icon={<UploadIcon />}
               text={Locale.UI.Export}
               onClick={() => {
@@ -553,6 +873,10 @@ function SyncItems() {
 
       {showSyncConfigModal && (
         <SyncConfigModal onClose={() => setShowSyncConfigModal(false)} />
+      )}
+
+      {showLocalData && (
+        <LocalDataModal onClose={() => setShowLocalData(false)} />
       )}
     </>
   );
@@ -649,6 +973,13 @@ export function Settings() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  // force it to set false for textmoderation if the provider is Azure or Google since default is true
+  useEffect(() => {
+    // This will set textmoderation to false if the provider is Azure or Google
+    if (accessStore.provider === ServiceProvider.Azure || accessStore.provider === ServiceProvider.Google) {
+      updateConfig(prevConfig => ({ ...prevConfig, textmoderation: false }));
+    }
+  }, [accessStore.provider, updateConfig]); // fix warning react while building into binaries
 
   const clientConfig = useMemo(() => getClientConfig(), []);
   const showAccessCode = enabledAccessControl && !clientConfig?.isApp;
@@ -742,7 +1073,24 @@ export function Settings() {
               ))}
             </Select>
           </ListItem>
+          {clientConfig?.isApp ? (
+            <ListItem
+              title={Locale.Settings.PinAppKey}
+            >
+              <input
+                type="text"
+                value={config.desktopShortcut}
+                placeholder="e.g., ALT+F4"
+                onChange={(e) =>
+                  config.update((config) => {
+                    const shortcut = e.currentTarget.value;
+                    config.desktopShortcut = ShortcutValidator.desktopShortcut(shortcut);
+                  })
+                }
+              ></input>
 
+            </ListItem>
+          ) : null}
           <ListItem title={Locale.Settings.Theme}>
             <Select
               value={config.theme}
@@ -821,6 +1169,39 @@ export function Settings() {
                 updateConfig(
                   (config) =>
                     (config.sendPreviewBubble = e.currentTarget.checked),
+                )
+              }
+            ></input>
+          </ListItem>
+          <ListItem
+            title={Locale.Settings.SpeedAnimation.Title}
+            subTitle={Locale.Settings.SpeedAnimation.SubTitle}
+          >
+            <InputRange
+              title={`${config.speed_animation ?? 60} m/s`}
+              value={(config.speed_animation ?? 60)}
+              min="1"
+              max="200" // average max to made it very slowly like while a server lag hahaha
+              step="1"
+              onChange={(e) =>
+                config.update((config) => {
+                  const speed = parseInt(e.currentTarget.value);
+                  config.speed_animation = speed_animationValidator.speed_animation(speed);
+                })
+              }
+            ></InputRange>
+          </ListItem>
+          <ListItem
+            title={Locale.Settings.AutoScrollMessage.Title}
+            subTitle={Locale.Settings.AutoScrollMessage.SubTitle}
+          >
+            <input
+              type="checkbox"
+              checked={config.autoScrollMessage}
+              onChange={(e) =>
+                updateConfig(
+                  (config) =>
+                    (config.autoScrollMessage = e.currentTarget.checked),
                 )
               }
             ></input>
@@ -961,7 +1342,7 @@ export function Settings() {
                     </Select>
                   </ListItem>
 
-                  {accessStore.provider === "OpenAI" ? (
+                  {accessStore.provider === "OpenAI" || accessStore.provider === "Custom" ? (
                     <>
                       <ListItem
                         title={Locale.Settings.Access.OpenAI.Endpoint.Title}
@@ -1176,6 +1557,23 @@ export function Settings() {
               config.update((config) => (config.modelConfig = modelConfig));
             }}
           />
+          {accessStore.provider !== ServiceProvider.Azure && 
+           accessStore.provider !== ServiceProvider.Google && ( // disable text-moderation for azure and google provider
+            <ListItem
+              title={Locale.Settings.TextModeration.Title}
+              subTitle={Locale.Settings.TextModeration.SubTitle}
+            >
+              <input
+                type="checkbox"
+                checked={config.textmoderation}
+                onChange={(e) => {
+                  updateConfig((config) => {
+                    config.textmoderation = e.currentTarget.checked;
+                  });
+                }}
+              ></input>
+            </ListItem>
+          )}
         </List>
 
         {shouldShowPromptModal && (

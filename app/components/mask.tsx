@@ -414,7 +414,7 @@ export function MaskPage() {
   const [searchText, setSearchText] = useState("");
   const masks = searchText.length > 0 ? searchMasks : allMasks;
 
-  // refactored already, now it accurate
+  // simple search, will refactor later
   const onSearch = (text: string) => {
     setSearchText(text);
     if (text.length > 0) {
@@ -433,7 +433,10 @@ export function MaskPage() {
   const closeMaskModal = () => setEditingMaskId(undefined);
 
   const downloadAll = () => {
-    downloadAs(JSON.stringify(masks.filter((v) => !v.builtin)), FileName.Masks);
+    downloadAs(
+      masks.filter((v) => !v.builtin),
+      FileName.Masks,
+    );
   };
 
   const importFromFile = () => {
@@ -606,12 +609,7 @@ export function MaskPage() {
                 text={Locale.Mask.EditModal.Download}
                 key="export"
                 bordered
-                onClick={() =>
-                  downloadAs(
-                    JSON.stringify(editingMask),
-                    `${editingMask.name}.json`,
-                  )
-                }
+                onClick={() => downloadAs(editingMask, `${editingMask.name}.json`)}
               />,
               <IconButton
                 key="copy"

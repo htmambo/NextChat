@@ -41,7 +41,12 @@ const ru: PartialLocaleType = {
     Copy: "Копировать все",
     Download: "Скачать",
     MessageFromYou: "Сообщение от вас",
-    MessageFromChatGPT: "Сообщение от ChatGPT",
+    MessageFromChatGPT: {
+      NoRole: "Сообщение от ChatGPT",
+      RoleAssistant: "Ассистент",
+      RoleSystem: "Система",
+      SysMemoryPrompt: "Подсказка системной памяти",
+    },
   },
   Memory: {
     Title: "Память",
@@ -91,6 +96,10 @@ const ru: PartialLocaleType = {
       Title: "Отправить предпросмотр",
       SubTitle: "Предварительный просмотр markdown в пузыре",
     },
+    AutoScrollMessage: {
+      Title: "Автопрокрутка ответа",
+      SubTitle: "Прокрутка сообщения во время ответа",
+    },
     Mask: {
       Splash: {
         Title: "Экран заставки маски",
@@ -129,11 +138,14 @@ const ru: PartialLocaleType = {
     Usage: {
       Title: "Баланс аккаунта",
       SubTitle(used: any, total: any) {
-        return `Использовано в этом месяце $${used}, подписка $${total}`;
+        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "неизвестно";
+        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "неизвестно";
+        const usedFormatted = new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'USD' }).format(used);
+        return `Использовано в этом месяце: ${usedFormatted}, Жесткий лимит: ${hardLimitusd}, Утвержденный лимит использования: ${hardLimit}`;
       },
       IsChecking: "Проверка...",
       Check: "Проверить",
-      NoAccess: "Введите API ключ, чтобы проверить баланс",
+      NoAccess: `Введите ключ сеанса в ключ API, начинающийся с префикса "sess-", чтобы проверить баланс.`,
     },
 
     Model: "Модель",
@@ -186,6 +198,10 @@ const ru: PartialLocaleType = {
   FineTuned: {
     Sysmessage: "Вы - ассистент, который",
   },
+  PrivacyPage: {
+    Name: "Конфиденциальность",
+    Confirm: "Принять",
+  },
   Mask: {
     Name: "Маска",
     Page: {
@@ -231,6 +247,7 @@ const ru: PartialLocaleType = {
     Cancel: "Отмена",
     Close: "Закрыть",
     Create: "Создать",
+    Continue: "Продолжить",
     Edit: "Редактировать",
   },
   Exporter: {

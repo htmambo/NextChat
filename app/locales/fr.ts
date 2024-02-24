@@ -66,7 +66,12 @@ const fr: PartialLocaleType = {
     Copy: "Tout sélectionner",
     Download: "Télécharger",
     MessageFromYou: "Message de votre part",
-    MessageFromChatGPT: "Message de ChatGPT",
+    MessageFromChatGPT: {
+      NoRole: "Message de ChatGPT",
+      RoleAssistant: "Assistant",
+      RoleSystem: "Système",
+      SysMemoryPrompt: "Invite de mémoire système",
+    },
   },
   Memory: {
     Title: "Prompt mémoire",
@@ -135,6 +140,10 @@ const fr: PartialLocaleType = {
       Title: "Aperçu de l'envoi dans une bulle",
       SubTitle: "Aperçu du Markdown dans une bulle",
     },
+    AutoScrollMessage: {
+      Title: "Réponse défilement automatique",
+      SubTitle: "Faire défiler le message lors de la réponse",
+    },
     Mask: {
       Splash: {
         Title: "Écran de masque",
@@ -177,11 +186,14 @@ const fr: PartialLocaleType = {
     Usage: {
       Title: "Solde du compte",
       SubTitle(used: any, total: any) {
-        return `Épuisé ce mois-ci $${used}, abonnement $${total}`;
+        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "inconnu";
+        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "inconnu";
+        const usedFormatted = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(used);
+        return `Utilisé ce mois-ci : ${usedFormatted}, Limite dure : ${hardLimitusd}, Limite d'utilisation approuvée : ${hardLimit}`;
       },
       IsChecking: "Vérification...",
       Check: "Vérifier",
-      NoAccess: "Entrez la clé API pour vérifier le solde",
+      NoAccess: `Entrez la clé de session dans la clé API en commençant par le préfixe "sess-" pour vérifier le solde.`,
     },
 
     Model: "Modèle",
@@ -238,6 +250,10 @@ const fr: PartialLocaleType = {
   },
   FineTuned: {
     Sysmessage: "Eres un asistente que",
+  },
+  PrivacyPage: {
+    Name: "Confidentialité",
+    Confirm: "Accepter",
   },
   Mask: {
     Name: "Masque",
@@ -296,6 +312,7 @@ const fr: PartialLocaleType = {
     Cancel: "Annuler",
     Close: "Fermer",
     Create: "Créer",
+    Continue: "Continuer",
     Edit: "Éditer",
   },
   Exporter: {

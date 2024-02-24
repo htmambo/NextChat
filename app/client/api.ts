@@ -34,11 +34,13 @@ export interface LLMConfig {
   stream?: boolean;
   presence_penalty?: number;
   frequency_penalty?: number;
+  max_tokens?: number; // Include max_tokens as an optional property
 }
 
 export interface ChatOptions {
   messages: RequestMessage[];
   config: LLMConfig;
+  whitelist: boolean;
 
   onUpdate?: (message: string, chunk: string) => void;
   onFinish: (message: string) => void;

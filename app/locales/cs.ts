@@ -41,7 +41,12 @@ const cs: PartialLocaleType = {
     Copy: "Kopírovat vše",
     Download: "Stáhnout",
     MessageFromYou: "Zpráva od vás",
-    MessageFromChatGPT: "Zpráva z ChatGPT",
+    MessageFromChatGPT: {
+      NoRole: "Zpráva od ChatGPT",
+      RoleAssistant: "Asistent",
+      RoleSystem: "Systém",
+      SysMemoryPrompt: "Systémový paměťový dotaz",
+    },
   },
   Memory: {
     Title: "Pokyn z paměti",
@@ -91,6 +96,10 @@ const cs: PartialLocaleType = {
       Title: "Odesílat chatovací bublinu s náhledem",
       SubTitle: "Zobrazit v náhledu bubliny",
     },
+    AutoScrollMessage: {
+      Title: "Automatické rolování odpovědi",
+      SubTitle: "Rolovat zprávu při odpovídání",
+    },
     Mask: {
       Splash: {
         Title: "Úvodní obrazovka Masek",
@@ -128,11 +137,14 @@ const cs: PartialLocaleType = {
     Usage: {
       Title: "Stav účtu",
       SubTitle(used: any, total: any) {
-        return `Použito tento měsíc $${used}, předplaceno $${total}`;
+        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "neznámý";
+        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "neznámý";
+        const usedFormatted = new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'USD' }).format(used);
+        return `Použito tento měsíc: ${usedFormatted}, Tvrdý limit: ${hardLimitusd}, Schválený limit využití: ${hardLimit}`;
       },
       IsChecking: "Kontroluji...",
       Check: "Zkontrolovat",
-      NoAccess: "Pro kontrolu zůstatku zadejte klíč API",
+      NoAccess: `Zadejte klíč relace ve vstupním klíči API s předponou "sess-" pro kontrolu zůstatku.`,
     },
 
     Model: "Model",
@@ -183,6 +195,10 @@ const cs: PartialLocaleType = {
   FineTuned: {
     Sysmessage: "Jste asistent, který",
   },
+  PrivacyPage: {
+    Name: "Ochrana osobních údajů",
+    Confirm: "Souhlasím",
+  },
   Mask: {
     Name: "Maska",
     Page: {
@@ -225,6 +241,7 @@ const cs: PartialLocaleType = {
     Cancel: "Zrušit",
     Close: "Zavřít",
     Create: "Vytvořit",
+    Continue: "Pokračovat",
     Edit: "Upravit",
   },
   Exporter: {

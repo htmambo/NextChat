@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo, useState } from "react";
 
 import styles from "./home.module.scss";
 
@@ -11,6 +11,9 @@ import CloseIcon from "../icons/close.svg";
 import DeleteIcon from "../icons/delete.svg";
 import MaskIcon from "../icons/mask.svg";
 import PluginIcon from "../icons/plugin.svg";
+import PrivacyIcon from "../icons/locked.svg";
+import PinnedIcon from "../icons/pin.svg";
+import TodoIcon from "../icons/edit.svg"
 import DragIcon from "../icons/drag.svg";
 
 import Locale from "../locales";
@@ -29,7 +32,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { isIOS, useMobileScreen } from "../utils";
 import dynamic from "next/dynamic";
-import { showConfirm, showToast } from "./ui-lib";
+import { SearchInput, showConfirm, showToast } from "./ui-lib";
 
 const ChatList = dynamic(async () => (await import("./chat-list")).ChatList, {
   loading: () => null,
@@ -141,6 +144,8 @@ export function SideBar(props: { className?: string }) {
     [isMobileScreen],
   );
 
+  const [chatListSearch, setChatListSearch] = useState("");
+
   useHotKey();
 
   return (
@@ -155,13 +160,15 @@ export function SideBar(props: { className?: string }) {
     >
       <div className={styles["sidebar-header"]} data-tauri-drag-region>
         <div className={styles["sidebar-title"]} data-tauri-drag-region>
-          NextChat
+          ChatGPT Next
         </div>
         <div className={styles["sidebar-sub-title"]}>
           Build your own AI assistant.
         </div>
-        <div className={styles["sidebar-logo"] + " no-dark"}>
-          <ChatGptIcon />
+        <div className={`${styles["sidebar-logo"]} + no-dark`}>
+          <div className={`${styles["animated-logo"]} + no-dark`}>
+            <ChatGptIcon className={`${styles["rotate"]} + no-dark`} />
+          </div>
         </div>
       </div>
 
@@ -186,6 +193,41 @@ export function SideBar(props: { className?: string }) {
           onClick={() => showToast(Locale.WIP)}
           shadow
         />
+        <IconButton
+          icon={<PrivacyIcon />}
+          text={shouldNarrow ? undefined : Locale.PrivacyPage.Name}
+          className={styles["sidebar-bar-button"]}
+          onClick={() =>
+            navigate(Path.PrivacyPage, { state: { fromHome: true } })
+          }
+          shadow
+        />
+      </div>
+      <div className={styles["sidebar-header-bar"]}>
+        <IconButton
+          icon={<PinnedIcon />}
+          text={shouldNarrow ? undefined : Locale.Changelog.Name}
+          className={styles["sidebar-bar-button"]}
+          onClick={() => navigate(Path.ChangeLog, { state: { fromHome: true } })}
+          shadow
+        />
+        <IconButton
+          icon={<TodoIcon />}
+          text={shouldNarrow ? undefined : Locale.TODOList.Name}
+          className={styles["sidebar-bar-button"]}
+          onClick={() => showToast(Locale.WIP)}
+          shadow
+        />
+      </div>
+
+      <div className={styles["chat-list-search"]}>
+        <SearchInput
+          value={chatListSearch}
+          onChange={(e) => {
+            setChatListSearch(e.currentTarget.value);
+          }}
+          placeholder={Locale.Home.Search}
+        ></SearchInput>
       </div>
 
       <div
@@ -196,7 +238,7 @@ export function SideBar(props: { className?: string }) {
           }
         }}
       >
-        <ChatList narrow={shouldNarrow} />
+        <ChatList narrow={shouldNarrow} search={chatListSearch} />
       </div>
 
       <div className={styles["sidebar-tail"]}>

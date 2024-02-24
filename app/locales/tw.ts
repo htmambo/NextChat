@@ -7,7 +7,7 @@ const tw: PartialLocaleType = {
     Unauthorized: "目前您的狀態是未授權，請前往[設定頁面](/#/auth)輸入授權碼。",
   },
   ChatItem: {
-    ChatItemCount: (count: number) => `${count} 則對話`,
+    ChatItemCount: (count: number) => `${count} 一則對話`,
   },
   Chat: {
     SubTitle: (count: number) => `您已經與 ChatGPT 進行了 ${count} 則對話`,
@@ -40,7 +40,12 @@ const tw: PartialLocaleType = {
     Copy: "複製全部",
     Download: "下載檔案",
     MessageFromYou: "來自您的訊息",
-    MessageFromChatGPT: "來自 ChatGPT 的訊息",
+    MessageFromChatGPT: {
+      NoRole: "來自ChatGPT的訊息",
+      RoleAssistant: "助理",
+      RoleSystem: "系統",
+      SysMemoryPrompt: "系統記憶提示",
+    },
   },
   Memory: {
     Title: "上下文記憶 Prompt",
@@ -88,6 +93,10 @@ const tw: PartialLocaleType = {
       Title: "預覽氣泡",
       SubTitle: "在預覽氣泡中預覽 Markdown 內容",
     },
+    AutoScrollMessage: {
+      Title: "自動滾動回覆",
+      SubTitle: "回覆時滾動訊息",
+    },
     Mask: {
       Splash: {
         Title: "面具啟動頁面",
@@ -124,11 +133,14 @@ const tw: PartialLocaleType = {
     Usage: {
       Title: "帳戶餘額",
       SubTitle(used: any, total: any) {
-        return `本月已使用 $${used}，訂閱總額 $${total}`;
+        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "未知";
+        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "未知";
+        const usedFormatted = new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'USD' }).format(used);
+        return `本月使用金额：${usedFormatted}，硬限制金额：${hardLimitusd}，批准使用限额：${hardLimit}`;
       },
       IsChecking: "正在檢查…",
       Check: "重新檢查",
-      NoAccess: "輸入 API Key 檢視餘額",
+      NoAccess: `輸入以"sess-"為前綴的API金鑰中的會話金鑰以檢查餘額。`,
     },
 
     Model: "模型 (model)",
@@ -173,6 +185,10 @@ const tw: PartialLocaleType = {
   },
   Plugin: { Name: "外掛" },
   FineTuned: { Sysmessage: "你是一個助手" },
+  PrivacyPage: {
+    Name: "隱私",
+    Confirm: "同意",
+  },
   Mask: {
     Name: "面具",
     Page: {
@@ -214,6 +230,7 @@ const tw: PartialLocaleType = {
     Cancel: "取消",
     Close: "關閉",
     Create: "新增",
+    Continue: "繼續",
     Edit: "編輯",
   },
   Exporter: {

@@ -9,8 +9,28 @@ const en: LocaleType = {
   WIP: "Coming Soon...",
   Error: {
     Unauthorized: isApp
-      ? "Invalid API Key, please check it in [Settings](/#/settings) page."
+      ? "Unauthorized access, please enter your OpenAI API Key in [auth](/#/auth) page."
       : "Unauthorized access, please enter access code in [auth](/#/auth) page, or enter your OpenAI API Key.",
+    Content_Policy: {
+      Title:
+        "Your request got flagged because of a Content Policy Violation.",
+      SubTitle: 
+        "Read Here: https://platform.openai.com/docs/guides/moderation/overview",
+      Reason: {
+        Title: "Reason",
+        sexual: "Sexual",
+        hate: "Hate",
+        harassment: "Harassment",
+        "self-harm": "Self-harm",
+        "sexual/minors": "Sexual/minors",
+        "hate/threatening": "Hate/threatening",
+        "violence/graphic": "Violence/graphic",
+        "self-harm/intent": "Self-harm/intent",
+        "self-harm/instructions": "Self-harm/instructions",
+        "harassment/threatening": "Harassment/threatening",
+        violence: "Violence",
+      },
+    },
   },
   Auth: {
     Title: "Need Access Code",
@@ -42,6 +62,10 @@ const en: LocaleType = {
       Pin: "Pin",
       PinToastContent: "Pinned 1 messages to contextual prompts",
       PinToastAction: "View",
+      PinAppContent: {
+        Pinned : "Desktop App is now pinned",
+        UnPinned: "Desktop App is no longer pinned",
+      },
       Delete: "Delete",
       Edit: "Edit",
     },
@@ -50,8 +74,21 @@ const en: LocaleType = {
       newm: "Start a new chat with mask",
       next: "Next Chat",
       prev: "Previous Chat",
+      restart: "Restart a client",
       clear: "Clear Context",
       del: "Delete Chat",
+      save: "Save a current session chat",
+      load: "Load a session chat",
+      copymemoryai: "Copy a session of memory prompt ai",
+      updatemasks: "Update a session of memory prompt for a mask",
+      summarize: "Summarize the current session of this chat",
+      UI: {
+        MasksSuccess: "Successfully updated session of masks",
+        MasksFail: "Failed to update session of masks",
+        Summarizing: "Summarizing a current session of this conversation",
+        SummarizeSuccess: "Successfully summarize session of this chat",
+        SummarizeFail: "Failed to summarize session of this chat",
+      },      
     },
     InputActions: {
       Stop: "Stop",
@@ -69,6 +106,7 @@ const en: LocaleType = {
     },
     Rename: "Rename Chat",
     Typing: "Typing…",
+    GeneratingImage: "Generating Images…",
     Input: (submitKey: string) => {
       var inputHints = `${submitKey} to send`;
       if (submitKey === String(SubmitKey.Enter)) {
@@ -88,7 +126,12 @@ const en: LocaleType = {
     Copy: "Copy All",
     Download: "Download",
     MessageFromYou: "Message From You",
-    MessageFromChatGPT: "Message From ChatGPT",
+    MessageFromChatGPT: {
+      NoRole: "Message From ChatGPT",
+      RoleAssistant: "Assistant",
+      RoleSystem: "System",
+      SysMemoryPrompt: "System Memory Prompt",
+    },
     Share: "Share to ShareGPT",
     Format: {
       Title: "Export Format",
@@ -97,6 +140,10 @@ const en: LocaleType = {
     IncludeContext: {
       Title: "Including Context",
       SubTitle: "Export context prompts in mask or not",
+    },
+    IncludeSysMemoryPrompt: {
+      Title: "Including System Memory Prompts",
+      SubTitle: "Export system memory prompts in mask or not",
     },
     Steps: {
       Select: "Select",
@@ -127,6 +174,7 @@ const en: LocaleType = {
     DeleteChat: "Confirm to delete the selected conversation?",
     DeleteToast: "Chat Deleted",
     Revert: "Revert",
+    Search: "Enter filter keywords",
   },
   Settings: {
     Title: "Settings",
@@ -170,17 +218,33 @@ const en: LocaleType = {
       IsChecking: "Checking update...",
       FoundUpdate: (x: string) => `Found new version: ${x}`,
       GoToUpdate: "Update",
+      IsUpdating: "Updating...",
+      UpdateSuccessful: "A Version has been updated to the latest version",
+      UpdateFailed: "Update Failed",
     },
     SendKey: "Send Key",
+    PinAppKey: "Pin App Shortcut Key",
+    SystemPromptTemplate: {
+      Title: "System Prompt Template",
+      SubTitle: "A system prompt template for every request. It can use the local language. If the language is not listed, the default language (English) will be used.",
+    },
     Theme: "Theme",
     TightBorder: "Tight Border",
     SendPreviewBubble: {
       Title: "Send Preview Bubble",
       SubTitle: "Preview markdown in bubble",
     },
+    AutoScrollMessage: {
+      Title: "Auto-Scroll Reply",
+      SubTitle: "Scroll the message during reply",
+    },
     AutoGenerateTitle: {
       Title: "Auto Generate Title",
       SubTitle: "Generate a suitable title based on the conversation content",
+    },
+    SpeedAnimation: {
+      Title: "Speed Animation Response",
+      SubTitle: "A Speed Animation Response you can control how fast the response text is displayed during the animation",
     },
     Sync: {
       CloudState: "Last Update",
@@ -206,11 +270,50 @@ const en: LocaleType = {
           SubTitle:
             "Only applicable to the built-in CORS proxy for this project",
         },
-
+        AccessControl: {
+          Title: "Enable Overwrite Access Control",
+          SubTitle:
+            "Only applicable to the overwrite access control setting such as an access code",
+        },
+        LockClient: {
+          Title: "Enable Do Not Sync Current Data",
+          SubTitle: "Only sync data from other sources, not the current data",
+        },
         WebDav: {
-          Endpoint: "WebDAV Endpoint",
-          UserName: "User Name",
-          Password: "Password",
+          Endpoint: {
+            Name: "WebDav Endpoint",
+            SubTitle: "Configure the WebDav Endpoint",
+          },
+          UserName: {
+            Name: "User Name",
+            SubTitle: "Configure the User Name",
+          },
+          Password: {
+            Name: "Password",
+            SubTitle: "Configure the Password",
+          },
+          FileName: {
+            Name: "File Name",
+            SubTitle:
+              "File Name, for example: backtrackz.json (must be a JSON file)",
+          },
+        },
+        GithubGist: {
+          GistID: {
+            Name: "Github Gist ID",
+            SubTitle:
+              "Your Gist ID location, for example: gist.github.com/H0llyW00dzZ/<gistid>/etc. copy then paste the <gistid> here.",
+          },
+          FileName: {
+            Name: "File Name",
+            SubTitle:
+              "File Name, for example: backtrackz.json (must be a JSON file)",
+          },
+          AccessToken: {
+            Name: "Access Token",
+            SubTitle:
+              "Make sure you have permission for syncing. Enable Private & Public there.",
+          },
         },
 
         UpStash: {
@@ -218,13 +321,40 @@ const en: LocaleType = {
           UserName: "Backup Name",
           Password: "UpStash Redis REST Token",
         },
+
+        GoSync: {
+          Endpoint: "GoSync REST Url",
+          UserName: "Backup Name",
+          Password: "GoSync REST Token",
+          FileName: "File Name",
+        },
+
       },
 
       LocalState: "Local Data",
       Overview: (overview: any) => {
         return `${overview.chat} chats，${overview.message} messages，${overview.prompt} prompts，${overview.mask} masks`;
       },
+      Description: {
+        Chat: (overview: any) => {
+          const title = "Chats";
+          const description = `${overview.chat} chats, ${overview.message} messages`;
+          return { title, description };
+        },
+        Prompt: (overview: any) => {
+          const title = "Prompts";
+          const description = `${overview.prompt} prompts`;
+          return { title, description };
+        },
+        Masks: (overview: any) => {
+          const title = "Masks";
+          const description = `${overview.mask} masks`;
+          return { title, description };
+        },
+      },
       ImportFailed: "Failed to import from file",
+      ImportChatSuccess: "Chat data imported successfully.",
+      ImportPromptsSuccess: "Prompts data imported successfully.",
     },
     Mask: {
       Splash: {
@@ -263,15 +393,32 @@ const en: LocaleType = {
       SubTitle:
         "Will compress if uncompressed messages length exceeds the value",
     },
+    Token: {
+      Title: "API Key",
+      SubTitle: "Use your key to ignore access code limit",
+      Placeholder: "OpenAI API Key",
+    },
 
     Usage: {
       Title: "Account Balance",
       SubTitle(used: any, total: any) {
-        return `Used this month $${used}, subscription $${total}`;
+        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "unknown";
+        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "unknown";
+        const usedFormatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(used);
+        return `Used this month ${usedFormatted}, Hard limit ${hardLimitusd}, Approved usage limit ${hardLimit}`;
       },
       IsChecking: "Checking...",
       Check: "Check",
-      NoAccess: "Enter API Key to check balance",
+      NoAccess: `Enter Session Key in API Key starting with prefix "sess-" to check balance.`,
+    },
+    AccessCode: {
+      Title: "Access Code",
+      SubTitle: "Access control enabled",
+      Placeholder: "Need Access Code",
+    },
+    Endpoint: {
+      Title: "Endpoint",
+      SubTitle: "Custom endpoint must start with http(s)://",
     },
     Access: {
       AccessCode: {
@@ -352,6 +499,10 @@ const en: LocaleType = {
       Title: "Max Tokens",
       SubTitle: "Maximum length of input tokens and generated tokens",
     },
+    UseMaxTokens: {
+      Title: "Use Max Tokens",
+      SubTitle: "Whether to use the maximum number of max tokens.",
+    },
     PresencePenalty: {
       Title: "Presence Penalty",
       SubTitle:
@@ -361,6 +512,31 @@ const en: LocaleType = {
       Title: "Frequency Penalty",
       SubTitle:
         "A larger value decreasing the likelihood to repeat the same line",
+    },
+    TextModeration: {
+      Title: "Text Moderation",
+      SubTitle:
+        "A Text Moderation to check whether content complies with OpenAI's usage policies.",
+    },
+    NumberOfImages: {
+      Title: "Number Image Create",
+      SubTitle:
+        "A number of images to generate\nMust be between 1 and 10. For dall-e-3, only 1 is supported.",
+    },
+    QualityOfImages: {
+      Title: "Quality Image Create",
+      SubTitle:
+        "A quality of the image that will be generated\nThis Configuration is only supported for dall-e-3.",
+    },
+    SizeOfImages: {
+      Title: "Size Image",
+      SubTitle:
+        "A size of the generated images\nDALL·E-2 : Must be one of `256x256`, `512x512`, or `1024x1024`.\nDALL-E-3 : Must be one of `1024x1024`, `1792x1024`, or `1024x1792`.",
+    },
+    StyleOfImages: {
+      Title: "Style Image",
+      SubTitle:
+        "A style of the generated images\nMust be one of vivid or natural\nThis Configuration is only supported for dall-e-3",
     },
   },
   Store: {
@@ -372,8 +548,9 @@ const en: LocaleType = {
         "This is a summary of the chat history as a recap: " + content,
       Topic:
         "Please generate a four to five word title summarizing our conversation without any lead-in, punctuation, quotation marks, periods, symbols, bold text, or additional text. Remove enclosing quotation marks.",
-      Summarize:
-        "Summarize the discussion briefly in 200 words or less to use as a prompt for future context.",
+      Summarize: // Improved By H0llyW00dzZ Ref : https://github.com/H0llyW00dzZ/GoGenAI-Terminal-Chat
+        "In 200 words or less, provide a brief summary of the ongoing discussion.\n" +
+        "This summary will serve as a prompt for contextual reference in future interactions",
     },
   },
   Copy: {
@@ -396,6 +573,16 @@ const en: LocaleType = {
   },
   FineTuned: {
     Sysmessage: "You are an assistant that",
+  },
+  Changelog: {
+    Name: "Change Log",
+  },
+  TODOList: {
+    Name: "Todo List",
+  },
+  PrivacyPage: {
+    Name: "Privacy",
+    Confirm: "Agree",
   },
   Mask: {
     Name: "Mask",
@@ -430,6 +617,14 @@ const en: LocaleType = {
       HideContext: {
         Title: "Hide Context Prompts",
         SubTitle: "Do not show in-context prompts in chat",
+        UnHide: "Show Context prompts in chat",
+        Hide: "Hide Context prompts in chat",
+      },
+      ShowFullChatHistory: {
+        Title: "Display All Chat History",
+        SubTitle: "Show the complete chat history",
+        UnHide: "Reveal the entire chat history",
+        Hide: "Hide all chat history (Show only the last 15 messages)",
       },
       Share: {
         Title: "Share This Mask",
@@ -453,20 +648,36 @@ const en: LocaleType = {
     Cancel: "Cancel",
     Close: "Close",
     Create: "Create",
+    Continue: "Continue",
     Edit: "Edit",
     Export: "Export",
     Import: "Import",
     Sync: "Sync",
     Config: "Config",
+    Manage: "Manage",
+  },
+  // don't linting this `System_Template` keep format like this
+  // this a object not string
+  System_Template: `
+You are ChatGPT, a large language model trained by {{ServiceProvider}}.
+Knowledge cutoff: {{cutoff}}
+Current model: {{model}}
+Current time: {{time}}
+Latex inline: $x^2$ 
+Latex block: $$e=mc^2$$`,
+  Label_System_Template: {
+    Default: "Default System Template",
+    Local: "Local System Template",
   },
   Exporter: {
     Description: {
       Title: "Only messages after clearing the context will be displayed",
     },
     Model: "Model",
+    ServiceProvider: "Service Provider",
     Messages: "Messages",
     Topic: "Topic",
-    Time: "Time",
+    Time: "Date & Time",
   },
 
   URLCommand: {
