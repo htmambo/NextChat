@@ -38,6 +38,7 @@ dev
 
 .vscode
 .idea
+.zed
 
 # docker-compose env files
 .env
