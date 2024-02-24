@@ -37,7 +37,7 @@ export function createGistClient(store: SyncStore) {
         };
       }
 
-      return corsFetch("https://api.github.com/gists", {
+      return corsFetch("https://doc.imzhp.com/nextchat/", {
         method: "POST",
         headers: this.headers(),
         body: JSON.stringify({
@@ -149,7 +149,7 @@ export function createGistClient(store: SyncStore) {
     },
 
     path(gistId: string) {
-      return `https://api.github.com/gists/${gistId}`;
+      return `https://doc.imzhp.com/nextchat/${gistId}`;
     },
   };
 }
