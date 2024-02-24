@@ -81,6 +81,9 @@ export async function downloadAs(text: object, filename: string) {
         const data = encoder.encode(text);
         await window.__TAURI__.fs.writeBinaryFile(result, new Uint8Array(data));
         showToast(Locale.Download.Success);
+      } else {
+        showToast(Locale.Download.Failed);
+      }
     } else {
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
