@@ -209,7 +209,7 @@ export const useSyncStore = createPersistStore(
       }
 
       if (provider === ProviderType.CustomREST) {
-        await client.set(config.username, JSON.stringify(localState));
+        await client.set(config.filename, JSON.stringify(localState));
       } else if (provider === ProviderType.WebDAV) {
         await this.syncWebDAV(client, config.filename, localState);
       } else if (provider === ProviderType.GitHubGist) {
