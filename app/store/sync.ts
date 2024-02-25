@@ -38,6 +38,12 @@ const DEFAULT_SYNC_STATE = {
   proxyUrl: corsPath(ApiPath.Cors),
   enableAccessControl: false,
 
+  CustomREST: {
+    endpoint: "",
+    username: STORAGE_KEY,
+    token: "",
+  },
+
   githubGist: {
     filename: "",
     gistId: "",
@@ -202,7 +208,9 @@ export const useSyncStore = createPersistStore(
         accessControl.useCustomConfig = userLocalState["access-control"].useCustomConfig;
       }
 
-      if (provider === ProviderType.WebDAV) {
+      if (provider === ProviderType.CustomREST) {
+        await client.set(config.username, JSON.stringify(localState));
+      } else if (provider === ProviderType.WebDAV) {
         await this.syncWebDAV(client, config.filename, localState);
       } else if (provider === ProviderType.GitHubGist) {
         await this.syncGitHubGist(client, config.filename, localState);
