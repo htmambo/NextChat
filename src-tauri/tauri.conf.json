@@ -87,8 +87,7 @@
     },
     "security": {
       "csp": null,
-      "dangerousUseHttpScheme": true,
-      "allowlist": ["https://doc.imzhp.com"]
+      "dangerousUseHttpScheme": true
     },
     "updater": {
       "active": true,
