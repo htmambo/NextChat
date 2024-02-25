@@ -18,15 +18,10 @@ export function createUpstashClient(store: SyncStore) {
   return {
     async check() {
       try {
-        // 初始化 Tauri API
-        await window.tauri.init();
-        const res = await window.tauri.fetch({
-          url: this.path(`get/${storeKey}`),
-          options: {
-            method: "GET",
-            headers: this.headers(),
-            mode: "cors",
-          }
+        const res = await corsFetch(this.path(`get/${storeKey}`), {
+          method: "GET",
+          headers: this.headers(),
+          proxyUrl,
         });
         console.log("[Upstash] check", res.status, res.statusText);
         return [200].includes(res.status);
