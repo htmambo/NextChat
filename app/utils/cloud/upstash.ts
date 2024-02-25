@@ -18,10 +18,13 @@ export function createUpstashClient(store: SyncStore) {
   return {
     async check() {
       try {
-        const res = await corsFetch(this.path(`get/${storeKey}`), {
-          method: "GET",
-          headers: this.headers(),
-          proxyUrl,
+        const res = await window.tauri.fetch({
+          url: this.path(`get/${storeKey}`),
+          options: {
+            method: "GET",
+            headers: this.headers(),
+            mode: "cors",
+          }
         });
         console.log("[Upstash] check", res.status, res.statusText);
         return [200].includes(res.status);
