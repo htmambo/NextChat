@@ -6,86 +6,69 @@ import { corsFetch } from "../cors";
 export type GistClient = ReturnType<typeof createGistClient>;
 
 export function createGistClient(store: SyncStore) {
-  let gistId = store.githubGist.gistId;
+  const config = store.githubGist;
+  const storeKey = config.username.length === 0 ? STORAGE_KEY : config.username;
   const token = store.githubGist.token;
-  const fileBackup = store.githubGist.filename;
-  const currentDate = new Date().toLocaleString("en-US", {
-    timeZone: "UTC",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
   // a proxy disable for a tmp since github doesn't need proxy url
   const proxyUrl =
     store.useProxy && store.proxyUrl.length > 0 ? store.proxyUrl : undefined;
 
   return {
+    async check() {
+      try {
+        const res = await corsFetch(this.path("get", storeKey), {
+          method: "GET",
+          headers: this.headers(),
+          proxyUrl,
+          mode: "cors",
+        });
 
-    async check(): Promise<string> {
-      const res = await corsFetch(this.path("get", gistId), {
+        console.log("[Gist] check", res.status, res.statusText);
+        if (res.status === 200) {
+          return [200].includes(res.status);
+        } else {
+          return false;
+        }
+      } catch (e) {
+        console.error("[Gist] failed to check", e);
+      }
+      return false;
+    },
+
+    async get() {
+      const res = await corsFetch(this.path("get", storeKey), {
         method: "GET",
         headers: this.headers(),
         proxyUrl,
         mode: "cors",
       });
 
-      console.log("[Gist] Check A File Name", res.status, res.statusText);
-
-      if (res.status === 200) {
-        return "success"; // Return success if the Gist exists
-      } else if (res.status === 404) {
-        return "failed"; // Return failed if the Gist doesn't exist
-      }
-
-      return ""; // Return an empty string for other cases
-    },
-
-    async get() {
-      const res = await corsFetch(this.path("get", gistId), {
-        method: "GET",
-        headers: this.headers(),
-      });
-
       console.log(
-        "[Gist] Get A File Name",
-        `${fileBackup}`,
+        "[Gist] get key = ",
+        storeKey,
         res.status,
         res.statusText,
       );
-
+      let resJson = {result: ""};
       if (res.status === 200) {
-        const data = await res.json();
-        return data.files[fileBackup]?.content ?? "";
-      }
+        lett resJson = (await res.json()) as { result: string };
 
-      return "";
+      }
+      return resJson.result;
     },
 
     async set(_: string, value: string) {
-      const existingContent = await this.check();
-      const description = `[Sync] [200 OK] [GithubGist] Last Sync: ${currentDate} Site: ${REPO_URL}`;
-
-      return corsFetch(this.path("set", gistId), {
-        method: existingContent ? "PATCH" : "POST",
+      return corsFetch(this.path("set", storeKey), {
+        method: "POST",
         headers: this.headers(),
-        body: JSON.stringify({
-          description,
-          files: {
-            [fileBackup]: {
-              content: value,
-            },
-          },
-        }),
+        body: value,
         proxyUrl,
         mode: "cors",
       })
         .then((res) => {
           console.log(
-            "[Gist] Set A Data oF File Name",
-            `${fileBackup}`,
+            "[Gist] set key = ",
+            storeKey,
             res.status,
             res.statusText,
           );
@@ -93,8 +76,8 @@ export function createGistClient(store: SyncStore) {
         })
         .catch((error) => {
           console.error(
-            "[Gist] Set A Data oF File Name",
-            `${fileBackup}`,
+            "[Gist] set key = ",
+            storeKey,
             error,
           );
           return "";
@@ -103,13 +86,23 @@ export function createGistClient(store: SyncStore) {
 
     headers() {
       return {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${config.token}`,
         "Content-Type": "application/json",
       };
     },
 
-    path(method: string, gistId: string) {
-      return `https://doc.imzhp.com/nextchat/${method}/${gistId}`;
+    path(method: string, path: string) {
+      let url = config.endpoint;
+
+      if (!url.endsWith("/")) {
+        url += "/";
+      }
+
+      if (path.startsWith("/")) {
+        path = path.slice(1);
+      }
+
+      return url + method + "/" + path;
     },
   };
 }

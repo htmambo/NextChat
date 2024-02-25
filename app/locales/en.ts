@@ -214,10 +214,10 @@ const en: LocaleType = {
           Password: "Password",
         },
         GithubGist: {
-          GistID: {
-            Name: "Github Gist ID",
+          Endpoint: {
+            Name: "Your REST Url",
             SubTitle:
-              "Your Gist ID location, for example: gist.github.com/H0llyW00dzZ/<gistid>/etc. copy then paste the <gistid> here.",
+              "Your REST Url, for example: https://www.domain.com/anything.",
           },
           FileName: {
             Name: "File Name",

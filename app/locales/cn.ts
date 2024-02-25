@@ -211,10 +211,10 @@ const cn = {
           Password: "密码",
         },
         GithubGist: {
-          GistID: {
-            Name: "Github Gist ID",
+          Endpoint: {
+            Name: "Your REST Url",
             SubTitle:
-              "您的 Gist ID 位置，例如：gist.github.com/H0llyW00dzZ/<gistid>/等。复制 <gistid> 并粘贴到这里。",
+              "您的 REST Url，例如：https://www.domain.com/anything。",
           },
           FileName: {
             Name: "文件名",
@@ -222,7 +222,7 @@ const cn = {
           },
           AccessToken: {
             Name: "访问令牌",
-            SubTitle: "确保您具有同步的权限。在那里启用私有和公开。",
+            SubTitle: "确保您具有同步的权限。",
           },
         },
 

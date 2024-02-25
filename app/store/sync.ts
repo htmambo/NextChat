@@ -20,12 +20,8 @@ export interface WebDavConfig {
   username: string;
   password: string;
 }
-
-export interface GistConfig {
-  filename: string;
-  gistId: string;
-  token: string;
-}
+// alternative fix for tauri
+const isApp = !!getClientConfig()?.isApp;
 export type SyncStore = GetStoreState<typeof useSyncStore>;
 
 const DEFAULT_SYNC_STATE = {
@@ -34,9 +30,8 @@ const DEFAULT_SYNC_STATE = {
   proxyUrl: corsPath(ApiPath.Cors),
 
   githubGist: {
+    endpoint: "",
     username: STORAGE_KEY,
-    filename: "",
-    gistId: "",
     token: "",
   },
 
@@ -55,8 +50,6 @@ const DEFAULT_SYNC_STATE = {
   lastSyncTime: 0,
   lastProvider: "",
 };
-// alternative fix for tauri
-const isApp = !!getClientConfig()?.isApp;
 
 export const useSyncStore = createPersistStore(
   DEFAULT_SYNC_STATE,

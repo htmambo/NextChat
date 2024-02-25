@@ -465,18 +465,18 @@ function SyncConfigModal(props: { onClose?: () => void }) {
           <>
             <List>
               <ListItem
-                title={Locale.Settings.Sync.Config.GithubGist.GistID.Name}
+                title={Locale.Settings.Sync.Config.GithubGist.Endpoint.Name}
                 subTitle={
-                  Locale.Settings.Sync.Config.GithubGist.GistID.SubTitle
+                  Locale.Settings.Sync.Config.GithubGist.Endpoint.SubTitle
                 }
               >
                 <input
                   type="text"
-                  value={syncStore.githubGist.gistId}
+                  value={syncStore.githubGist.endpoint}
                   onChange={(e) => {
                     syncStore.update(
                       (config) =>
-                        (config.githubGist.gistId = e.currentTarget.value),
+                        (config.githubGist.endpoint = e.currentTarget.value),
                     );
                   }}
                 ></input>
@@ -490,11 +490,11 @@ function SyncConfigModal(props: { onClose?: () => void }) {
               >
                 <input
                   type="text"
-                  value={syncStore.githubGist.filename}
+                  value={syncStore.githubGist.username}
                   onChange={(e) => {
                     syncStore.update(
                       (config) =>
-                        (config.githubGist.filename = e.currentTarget.value),
+                        (config.githubGist.username = e.currentTarget.value),
                     );
                   }}
                 ></input>
