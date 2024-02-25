@@ -25,7 +25,7 @@ export function createGistClient(store: SyncStore) {
   return {
 
     async check(): Promise<string> {
-      const res = await corsFetch(this.path(`get/$(gistId)`), {
+      const res = await corsFetch(this.path("get", gistId), {
         method: "GET",
         headers: this.headers(),
         proxyUrl,
@@ -43,53 +43,8 @@ export function createGistClient(store: SyncStore) {
       return ""; // Return an empty string for other cases
     },
 
-    async create(content: string) {
-      const description = `[200 OK] [GithubSync] Last Sync: ${currentDate} Site: ${REPO_URL}`;
-
-      const contentChunks = [...chunks(content)];
-      const files: { [key: string]: { content: string } } = {};
-
-      for (let i = 0; i < contentChunks.length; i++) {
-        const fileName = i === 0 ? fileBackup : `${fileBackup}_${i}`;
-        files[fileName] = {
-          content: contentChunks[i],
-        };
-      }
-
-      return corsFetch(this.path(`create/$(gistId)`), {
-        method: "POST",
-        headers: this.headers(),
-        body: JSON.stringify({
-          public: false,
-          description,
-          files,
-        }),
-        proxyUrl,
-        mode: "cors",
-      })
-        .then((res) => {
-          console.log(
-            "[Gist] Create A File Name",
-            `${fileBackup}`,
-            res.status,
-            res.statusText,
-          );
-          if (res.status === 201) {
-            return res.json().then((data) => {
-              gistId = data.id; // Update the gistId with the new Gist ID
-              return gistId;
-            });
-          }
-          return null;
-        })
-        .catch((error) => {
-          console.error("[Gist] Create A File Name", `${fileBackup}`, error);
-          return null;
-        });
-    },
-
     async get() {
-      const res = await corsFetch(this.path(`get/$(gistId)`), {
+      const res = await corsFetch(this.path("get", gistId), {
         method: "GET",
         headers: this.headers(),
       });
@@ -113,7 +68,7 @@ export function createGistClient(store: SyncStore) {
       const existingContent = await this.check();
       const description = `[Sync] [200 OK] [GithubGist] Last Sync: ${currentDate} Site: ${REPO_URL}`;
 
-      return corsFetch(this.path(`set/$(gistId)`), {
+      return corsFetch(this.path("set", gistId), {
         method: existingContent ? "PATCH" : "POST",
         headers: this.headers(),
         body: JSON.stringify({
@@ -153,8 +108,8 @@ export function createGistClient(store: SyncStore) {
       };
     },
 
-    path(gistId: string) {
-      return `https://doc.imzhp.com/nextchat/${gistId}`;
+    path(method: string, gistId: string) {
+      return `https://doc.imzhp.com/nextchat/${method}/${gistId}`;
     },
   };
 }
