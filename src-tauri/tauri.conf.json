@@ -14,6 +14,7 @@
   "tauri": {
     "allowlist": {
       "all": false,
+      "list": ["https://doc.imzhp.com"],
       "shell": {
         "all": false,
         "open": true
