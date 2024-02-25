@@ -51,7 +51,7 @@ export function createGistClient(store: SyncStore) {
       );
       let resJson = {result: ""};
       if (res.status === 200) {
-        lett resJson = (await res.json()) as { result: string };
+        resJson = (await res.json()) as { result: string };
 
       }
       return resJson.result;
