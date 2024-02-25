@@ -25,7 +25,7 @@ export function createGistClient(store: SyncStore) {
   return {
 
     async check(): Promise<string> {
-      const res = await corsFetch(this.path(gistId), {
+      const res = await corsFetch(this.path(`get/$(gistId)`), {
         method: "GET",
         headers: this.headers(),
         proxyUrl,
@@ -56,7 +56,7 @@ export function createGistClient(store: SyncStore) {
         };
       }
 
-      return corsFetch("https://doc.imzhp.com/nextchat/", {
+      return corsFetch(this.path(`create/$(gistId)`, {
         method: "POST",
         headers: this.headers(),
         body: JSON.stringify({
@@ -89,7 +89,7 @@ export function createGistClient(store: SyncStore) {
     },
 
     async get() {
-      const res = await corsFetch(this.path(gistId), {
+      const res = await corsFetch(this.path(`get/$(gistId)`), {
         method: "GET",
         headers: this.headers(),
       });
@@ -113,7 +113,7 @@ export function createGistClient(store: SyncStore) {
       const existingContent = await this.check();
       const description = `[Sync] [200 OK] [GithubGist] Last Sync: ${currentDate} Site: ${REPO_URL}`;
 
-      return corsFetch(this.path(gistId), {
+      return corsFetch(this.path(`set/$(gistId)`), {
         method: existingContent ? "PATCH" : "POST",
         headers: this.headers(),
         body: JSON.stringify({
