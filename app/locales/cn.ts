@@ -312,7 +312,7 @@ const cn = {
         },
         CustomREST: {
           Endpoint: {
-            Name: "Your REST Url",
+            Name: "自定义服务器",
             SubTitle:
               "您的 REST Url，例如：https://www.domain.com/anything。",
           },
