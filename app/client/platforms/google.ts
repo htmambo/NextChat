@@ -1,13 +1,14 @@
 import { Google, REQUEST_TIMEOUT_MS } from "@/app/constant";
 import { ChatOptions, getHeaders, LLMApi, LLMModel, LLMUsage } from "../api";
 import { useAccessStore, useAppConfig, useChatStore } from "@/app/store";
-import { getClientConfig } from "@/app/config/client";
-import { DEFAULT_API_HOST } from "@/app/constant";
 import {
-  getMessageTextContent,
-  getMessageImages,
-  isVisionModel,
-} from "@/app/utils";
+  EventStreamContentType,
+  fetchEventSource,
+} from "@fortaine/fetch-event-source";
+import { prettyObject } from "@/app/utils/format";
+import { getClientConfig } from "@/app/config/client";
+import Locale from "../../locales";
+import { getServerSideConfig } from "@/app/config/server";
 
 export class GeminiProApi implements LLMApi {
   extractMessage(res: any) {
@@ -20,35 +21,11 @@ export class GeminiProApi implements LLMApi {
     );
   }
   async chat(options: ChatOptions): Promise<void> {
-    // const apiClient = this;
-    const visionModel = isVisionModel(options.config.model);
-    let multimodal = false;
-    const messages = options.messages.map((v) => {
-      let parts: any[] = [{ text: getMessageTextContent(v) }];
-      if (visionModel) {
-        const images = getMessageImages(v);
-        if (images.length > 0) {
-          multimodal = true;
-          parts = parts.concat(
-            images.map((image) => {
-              const imageType = image.split(";")[0].split(":")[1];
-              const imageData = image.split(",")[1];
-              return {
-                inline_data: {
-                  mime_type: imageType,
-                  data: imageData,
-                },
-              };
-            }),
-          );
-        }
-      }
-      return {
-        role: v.role.replace("assistant", "model").replace("system", "user"),
-        parts: parts,
-      };
-    });
-
+    const apiClient = this;
+    const messages = options.messages.map((v) => ({
+      role: v.role.replace("assistant", "model").replace("system", "user"),
+      parts: [{ text: v.content }],
+    }));
     // google requires that role in neighboring messages must not be the same
     for (let i = 0; i < messages.length - 1; ) {
       // Check if current and next item both have the role "model"
@@ -62,9 +39,6 @@ export class GeminiProApi implements LLMApi {
         i++;
       }
     }
-    // if (visionModel && messages.length > 1) {
-    //   options.onError?.(new Error("Multiturn chat is not enabled for models/gemini-pro-vision"));
-    // }
     const modelConfig = {
       ...useAppConfig.getState().modelConfig,
       ...useChatStore.getState().currentSession().mask.modelConfig,
@@ -103,36 +77,34 @@ export class GeminiProApi implements LLMApi {
       ],
     };
 
-    const accessStore = useAccessStore.getState();
-    let baseUrl = accessStore.googleUrl;
-    const isApp = !!getClientConfig()?.isApp;
+    console.log("[Request] google payload: ", requestPayload);
 
-    let shouldStream = !!options.config.stream;
+    const shouldStream = !!options.config.stream;
     const controller = new AbortController();
     options.onController?.(controller);
     try {
-      let googleChatPath = visionModel
-        ? Google.VisionChatPath
-        : Google.ChatPath;
-      let chatPath = this.path(googleChatPath);
-
-      // let baseUrl = accessStore.googleUrl;
-
-      if (!baseUrl) {
-        baseUrl = isApp
-          ? DEFAULT_API_HOST + "/api/proxy/google/" + googleChatPath
-          : chatPath;
-      }
-
-      if (isApp) {
-        baseUrl += `?key=${accessStore.googleApiKey}`;
-      }
-      const chatPayload = {
+      let chatPath = this.path(Google.ChatPath);
+      let chatPayload = {
         method: "POST",
         body: JSON.stringify(requestPayload),
         signal: controller.signal,
         headers: getHeaders(),
       };
+      const accessStore = useAccessStore.getState();
+
+      let baseUrl = accessStore.googleUrl;
+      let googleApiKey = accessStore.googleApiKey;
+      if (baseUrl.length !== 0 && googleApiKey.length !== 0) {
+        // 如果baseUrl的最后一个字符是"/"，则删除
+        if (baseUrl.endsWith("/")) {
+          baseUrl = baseUrl.slice(0, baseUrl.length - 1);
+        }
+        // 删除chatPayload.headers中的authorization
+        delete chatPayload.headers["Authorization"];
+        chatPath = chatPath.replaceAll("api/google/", "");
+        // 重新设置chatPath
+        chatPath = `${baseUrl}/${chatPath}?key=${googleApiKey}`;
+      }
 
       // make a fetch request
       const requestTimeoutId = setTimeout(
@@ -142,6 +114,10 @@ export class GeminiProApi implements LLMApi {
       if (shouldStream) {
         let responseText = "";
         let remainText = "";
+        let streamChatPath = chatPath.replace(
+          "generateContent",
+          "streamGenerateContent",
+        );
         let finished = false;
 
         let existingTexts: string[] = [];
@@ -172,10 +148,7 @@ export class GeminiProApi implements LLMApi {
         // start animaion
         animateResponseText();
 
-        fetch(
-          baseUrl.replace("generateContent", "streamGenerateContent"),
-          chatPayload,
-        )
+        fetch(streamChatPath, chatPayload)
           .then((response) => {
             const reader = response?.body?.getReader();
             const decoder = new TextDecoder();
@@ -186,19 +159,6 @@ export class GeminiProApi implements LLMApi {
               value,
             }): Promise<any> {
               if (done) {
-                if (response.status !== 200) {
-                  try {
-                    let data = JSON.parse(ensureProperEnding(partialData));
-                    if (data && data[0].error) {
-                      options.onError?.(new Error(data[0].error.message));
-                    } else {
-                      options.onError?.(new Error("Request failed"));
-                    }
-                  } catch (_) {
-                    options.onError?.(new Error("Request failed"));
-                  }
-                }
-
                 console.log("Stream complete");
                 // options.onFinish(responseText + remainText);
                 finished = true;
