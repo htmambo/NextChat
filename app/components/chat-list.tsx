@@ -188,9 +188,7 @@ export function ChatList(props: { narrow?: boolean; search: string }) {
                         (!props.narrow && !isMobileScreen) ||
                         (await showConfirm(Locale.Home.DeleteChat))
                       ) {
-                        const sessionIdToDelete = item.id;
                         chatStore.deleteSession(i);
-                        clearUnfinishedInputForSession(sessionIdToDelete); // Use the session ID of the item being deleted
                       }
                     }}
                     narrow={props.narrow}
