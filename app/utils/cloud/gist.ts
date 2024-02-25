@@ -110,9 +110,8 @@ export function createGistClient(store: SyncStore) {
       return "";
     },
 
-    async set(data: object) {
+    async set(_: string, value: string) {
       const existingContent = await this.check();
-      const newContent = JSON.stringify(data, null, 2);
       const description = `[Sync] [200 OK] [GithubGist] Last Sync: ${currentDate} Site: ${REPO_URL}`;
 
       return corsFetch(this.path(gistId), {
@@ -122,7 +121,7 @@ export function createGistClient(store: SyncStore) {
           description,
           files: {
             [fileBackup]: {
-              content: newContent,
+              content: value,
             },
           },
         }),
@@ -136,7 +135,7 @@ export function createGistClient(store: SyncStore) {
             res.status,
             res.statusText,
           );
-          return newContent;
+          return value;
         })
         .catch((error) => {
           console.error(

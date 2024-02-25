@@ -117,23 +117,11 @@ export const useSyncStore = createPersistStore(
         console.log("[Sync] failed to get remote state", e);
       }
 
-      if (provider === ProviderType.GitHubGist) {
-        await this.syncGitHubGist(client, config.username, localState);
-      } else {
-        await client.set(config.username, JSON.stringify(localState));
-      }
+      await client.set(config.username, JSON.stringify(localState));
 
       this.markSyncTime();
     },
 
-
-    async syncGitHubGist(client: SyncClient<ProviderType.GitHubGist>, value: GistConfig | string, localState: AppState | Object) {
-      if (typeof value === 'string') {
-        await client.set(localState as string, value);
-      } else {
-        await client.set(localState as string, value.filename);
-      }
-    },
     async check() {
       const client = this.getClient();
       return await client.check();
