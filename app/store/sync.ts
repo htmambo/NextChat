@@ -34,6 +34,7 @@ const DEFAULT_SYNC_STATE = {
   proxyUrl: corsPath(ApiPath.Cors),
 
   githubGist: {
+    username: STORAGE_KEY,
     filename: "",
     gistId: "",
     token: "",
