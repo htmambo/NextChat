@@ -210,6 +210,21 @@ const cn = {
           UserName: "用户名",
           Password: "密码",
         },
+        GithubGist: {
+          GistID: {
+            Name: "Github Gist ID",
+            SubTitle:
+              "您的 Gist ID 位置，例如：gist.github.com/H0llyW00dzZ/<gistid>/等。复制 <gistid> 并粘贴到这里。",
+          },
+          FileName: {
+            Name: "文件名",
+            SubTitle: "文件名，例如：backtrackz.json（必须是 JSON 文件）",
+          },
+          AccessToken: {
+            Name: "访问令牌",
+            SubTitle: "确保您具有同步的权限。在那里启用私有和公开。",
+          },
+        },
 
         UpStash: {
           Endpoint: "UpStash Redis REST Url",

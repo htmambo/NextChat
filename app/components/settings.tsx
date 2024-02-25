@@ -461,6 +461,63 @@ function SyncConfigModal(props: { onClose?: () => void }) {
             </ListItem>
           </List>
         )}
+        {syncStore.provider === ProviderType.GitHubGist && (
+          <>
+            <List>
+              <ListItem
+                title={Locale.Settings.Sync.Config.GithubGist.GistID.Name}
+                subTitle={
+                  Locale.Settings.Sync.Config.GithubGist.GistID.SubTitle
+                }
+              >
+                <input
+                  type="text"
+                  value={syncStore.githubGist.gistId}
+                  onChange={(e) => {
+                    syncStore.update(
+                      (config) =>
+                        (config.githubGist.gistId = e.currentTarget.value),
+                    );
+                  }}
+                ></input>
+              </ListItem>
+
+              <ListItem
+                title={Locale.Settings.Sync.Config.GithubGist.FileName.Name}
+                subTitle={
+                  Locale.Settings.Sync.Config.GithubGist.FileName.SubTitle
+                }
+              >
+                <input
+                  type="text"
+                  value={syncStore.githubGist.filename}
+                  onChange={(e) => {
+                    syncStore.update(
+                      (config) =>
+                        (config.githubGist.filename = e.currentTarget.value),
+                    );
+                  }}
+                ></input>
+              </ListItem>
+              <ListItem
+                title={Locale.Settings.Sync.Config.GithubGist.AccessToken.Name}
+                subTitle={
+                  Locale.Settings.Sync.Config.GithubGist.AccessToken.SubTitle
+                }
+              >
+                <PasswordInput
+                  value={syncStore.githubGist.token}
+                  onChange={(e) => {
+                    syncStore.update(
+                      (config) =>
+                        (config.githubGist.token = e.currentTarget.value),
+                    );
+                  }}
+                ></PasswordInput>
+              </ListItem>
+            </List>
+          </>
+        )}
       </Modal>
     </div>
   );

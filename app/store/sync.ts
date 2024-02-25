@@ -21,13 +21,23 @@ export interface WebDavConfig {
   password: string;
 }
 
-const isApp = !!getClientConfig()?.isApp;
+export interface GistConfig {
+  filename: string;
+  gistId: string;
+  token: string;
+}
 export type SyncStore = GetStoreState<typeof useSyncStore>;
 
 const DEFAULT_SYNC_STATE = {
   provider: ProviderType.WebDAV,
   useProxy: true,
   proxyUrl: corsPath(ApiPath.Cors),
+
+  githubGist: {
+    filename: "",
+    gistId: "",
+    token: "",
+  },
 
   webdav: {
     endpoint: "",

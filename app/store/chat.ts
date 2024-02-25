@@ -345,7 +345,9 @@ export const useChatStore = createPersistStore(
           ]);
         });
 
-        var api: ClientApi;
+        // Changed 'var' to 'let' since 'api' is reassigned conditionally
+        // Note: keep type safety by using 'let' instead of 'var', this not a javascript lmao
+        let api: ClientApi; // stupid don't using var
         if (modelConfig.model.startsWith("gemini")) {
           api = new ClientApi(ModelProvider.GeminiPro);
         } else {
@@ -433,7 +435,7 @@ export const useChatStore = createPersistStore(
           modelConfig.enableInjectSystemPrompts &&
           session.mask.modelConfig.model.startsWith("gpt-");
 
-        var systemPrompts: ChatMessage[] = [];
+        let systemPrompts: ChatMessage[] = []; // Define the type for better type checking
         systemPrompts = shouldInjectSystemPrompts
           ? [
               createMessage({
@@ -530,7 +532,9 @@ export const useChatStore = createPersistStore(
         const session = get().currentSession();
         const modelConfig = session.mask.modelConfig;
 
-        var api: ClientApi;
+        // Changed 'var' to 'let' since 'api' is reassigned conditionally
+        // Note: keep type safety by using 'let' instead of 'var', this not a javascript lmao
+        let api: ClientApi;
         if (modelConfig.model.startsWith("gemini")) {
           api = new ClientApi(ModelProvider.GeminiPro);
         } else {

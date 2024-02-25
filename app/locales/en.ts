@@ -213,6 +213,23 @@ const en: LocaleType = {
           UserName: "User Name",
           Password: "Password",
         },
+        GithubGist: {
+          GistID: {
+            Name: "Github Gist ID",
+            SubTitle:
+              "Your Gist ID location, for example: gist.github.com/H0llyW00dzZ/<gistid>/etc. copy then paste the <gistid> here.",
+          },
+          FileName: {
+            Name: "File Name",
+            SubTitle:
+              "File Name, for example: backtrackz.json (must be a JSON file)",
+          },
+          AccessToken: {
+            Name: "Access Token",
+            SubTitle:
+              "Make sure you have permission for syncing. Enable Private & Public there.",
+          },
+        },
 
         UpStash: {
           Endpoint: "UpStash Redis REST Url",
