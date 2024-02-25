@@ -7,7 +7,7 @@ export type CustomRESTClient = ReturnType<typeof createCustomRESTClient>;
 
 export function createCustomRESTClient(store: SyncStore) {
   const config = store.CustomREST;
-  const storeKey = config.username.length === 0 ? STORAGE_KEY : config.username;
+  const storeKey = config.filename.length === 0 ? STORAGE_KEY : config.filename;
   // a proxy disable for a tmp since github doesn't need proxy url
   const proxyUrl =
     store.useProxy && store.proxyUrl.length > 0 ? store.proxyUrl : undefined;

@@ -40,7 +40,7 @@ const DEFAULT_SYNC_STATE = {
 
   CustomREST: {
     endpoint: "",
-    username: STORAGE_KEY,
+    filename: STORAGE_KEY,
     token: "",
   },
 

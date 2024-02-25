@@ -607,11 +607,11 @@ function SyncConfigModal(props: { onClose?: () => void }) {
               >
                 <input
                   type="text"
-                  value={syncStore.CustomREST.username}
+                  value={syncStore.CustomREST.filename}
                   onChange={(e) => {
                     syncStore.update(
                       (config) =>
-                        (config.CustomREST.username = e.currentTarget.value),
+                        (config.CustomREST.filename = e.currentTarget.value),
                     );
                   }}
                 ></input>
