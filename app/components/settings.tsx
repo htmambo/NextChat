@@ -578,6 +578,63 @@ function SyncConfigModal(props: { onClose?: () => void }) {
             <ListItem title={Locale.WIP}></ListItem>
           </List>
         )}
+        {syncStore.provider === ProviderType.CustomREST && (
+          <>
+            <List>
+              <ListItem
+                title={Locale.Settings.Sync.Config.CustomREST.Endpoint.Name}
+                subTitle={
+                  Locale.Settings.Sync.Config.CustomREST.Endpoint.SubTitle
+                }
+              >
+                <input
+                  type="text"
+                  value={syncStore.CustomREST.endpoint}
+                  onChange={(e) => {
+                    syncStore.update(
+                      (config) =>
+                        (config.CustomREST.endpoint = e.currentTarget.value),
+                    );
+                  }}
+                ></input>
+              </ListItem>
+
+              <ListItem
+                title={Locale.Settings.Sync.Config.CustomREST.UserName.Name}
+                subTitle={
+                  Locale.Settings.Sync.Config.CustomREST.UserName.SubTitle
+                }
+              >
+                <input
+                  type="text"
+                  value={syncStore.CustomREST.username}
+                  onChange={(e) => {
+                    syncStore.update(
+                      (config) =>
+                        (config.CustomREST.username = e.currentTarget.value),
+                    );
+                  }}
+                ></input>
+              </ListItem>
+              <ListItem
+                title={Locale.Settings.Sync.Config.CustomREST.AccessToken.Name}
+                subTitle={
+                  Locale.Settings.Sync.Config.CustomREST.AccessToken.SubTitle
+                }
+              >
+                <PasswordInput
+                  value={syncStore.CustomREST.token}
+                  onChange={(e) => {
+                    syncStore.update(
+                      (config) =>
+                        (config.CustomREST.token = e.currentTarget.value),
+                    );
+                  }}
+                ></PasswordInput>
+              </ListItem>
+            </List>
+          </>
+        )}
       </Modal>
     </div>
   );

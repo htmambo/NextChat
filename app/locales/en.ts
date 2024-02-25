@@ -315,6 +315,23 @@ const en: LocaleType = {
               "Make sure you have permission for syncing. Enable Private & Public there.",
           },
         },
+        CustomREST: {
+          Endpoint: {
+            Name: "Your REST Url",
+            SubTitle:
+              "Your REST Url, for example: https://www.domain.com/anything.",
+          },
+          UserName: {
+            Name: "Backup Name",
+            SubTitle:
+              "Backup Name, for example: nextchat.",
+          },
+          AccessToken: {
+            Name: "Access Token",
+            SubTitle:
+              "Make sure you have permission for syncing. Enable Private & Public there.",
+          },
+        },
 
         UpStash: {
           Endpoint: "UpStash Redis REST Url",

@@ -310,6 +310,21 @@ const cn = {
             SubTitle: "确保您具有同步的权限。在那里启用私有和公开。",
           },
         },
+        CustomREST: {
+          Endpoint: {
+            Name: "Your REST Url",
+            SubTitle:
+              "您的 REST Url，例如：https://www.domain.com/anything。",
+          },
+          UserName: {
+            Name: "备份名称",
+            SubTitle: "备份名称，例如：nextchat。",
+          },
+          AccessToken: {
+            Name: "访问令牌",
+            SubTitle: "确保您具有同步的权限。",
+          },
+        },
 
         UpStash: {
           Endpoint: "UpStash Redis REST Url",
