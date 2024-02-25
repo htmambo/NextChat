@@ -126,6 +126,14 @@ export const useSyncStore = createPersistStore(
       this.markSyncTime();
     },
 
+
+    async syncGitHubGist(client: SyncClient<ProviderType.GitHubGist>, value: GistConfig | string, localState: AppState | Object) {
+      if (typeof value === 'string') {
+        await client.set(localState as string, value);
+      } else {
+        await client.set(localState as string, value.filename);
+      }
+    },
     async check() {
       const client = this.getClient();
       return await client.check();
