@@ -13,7 +13,7 @@
   },
   "tauri": {
     "allowlist": {
-      "all": true,
+      "all": false,
       "shell": {
         "all": false,
         "open": true
@@ -87,7 +87,8 @@
     },
     "security": {
       "csp": null,
-      "dangerousUseHttpScheme": true
+      "dangerousUseHttpScheme": true,
+      "allowlist": ["https://doc.imzhp.com"]
     },
     "updater": {
       "active": true,
