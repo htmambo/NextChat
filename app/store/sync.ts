@@ -54,6 +54,8 @@ const DEFAULT_SYNC_STATE = {
   lastSyncTime: 0,
   lastProvider: "",
 };
+// alternative fix for tauri
+const isApp = !!getClientConfig()?.isApp;
 
 export const useSyncStore = createPersistStore(
   DEFAULT_SYNC_STATE,
@@ -70,9 +72,7 @@ export const useSyncStore = createPersistStore(
     export() {
       const state = getLocalAppState();
       const datePart = isApp
-        ? `${new Date().toLocaleDateString().replace(/\//g, "_")} ${new Date()
-            .toLocaleTimeString()
-            .replace(/:/g, "_")}`
+        ? `${new Date().toLocaleDateString().replace(/\//g, '_')} ${new Date().toLocaleTimeString().replace(/:/g, '_')}`
         : new Date().toLocaleString();
 
       const fileName = `Backup-${datePart}.json`;
