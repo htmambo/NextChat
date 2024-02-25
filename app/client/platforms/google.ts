@@ -1,14 +1,7 @@
 import { Google, REQUEST_TIMEOUT_MS } from "@/app/constant";
 import { ChatOptions, getHeaders, LLMApi, LLMModel, LLMUsage } from "../api";
 import { useAccessStore, useAppConfig, useChatStore } from "@/app/store";
-import {
-  EventStreamContentType,
-  fetchEventSource,
-} from "@fortaine/fetch-event-source";
-import { prettyObject } from "@/app/utils/format";
 import { getClientConfig } from "@/app/config/client";
-import Locale from "../../locales";
-import { getServerSideConfig } from "@/app/config/server";
 
 export class GeminiProApi implements LLMApi {
   extractMessage(res: any) {
