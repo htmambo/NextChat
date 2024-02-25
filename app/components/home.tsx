@@ -115,8 +115,8 @@ const loadAsyncGoogleFont = () => {
     getClientConfig()?.buildMode === "export" ? remoteFontUrl : proxyFontUrl;
   linkEl.rel = "stylesheet";
   linkEl.href =
-    googleFontUrl +
-    "/css2?family=" +
+    //googleFontUrl +
+    "https://hackerchat.btz.sh/google-fonts/css2?family=" +
     encodeURIComponent("Noto Sans:wght@300;400;700;900") +
     "&display=swap";
   document.head.appendChild(linkEl);
