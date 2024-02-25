@@ -118,7 +118,7 @@ export const useSyncStore = createPersistStore(
       }
 
       if (provider === ProviderType.GitHubGist) {
-        await this.syncGitHubGist(client, config.filename, localState);
+        await this.syncGitHubGist(client, config.username, localState);
       } else {
         await client.set(config.username, JSON.stringify(localState));
       }
