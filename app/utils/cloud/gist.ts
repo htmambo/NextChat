@@ -56,7 +56,7 @@ export function createGistClient(store: SyncStore) {
         };
       }
 
-      return corsFetch(this.path(`create/$(gistId)`, {
+      return corsFetch(this.path(`create/$(gistId))`, {
         method: "POST",
         headers: this.headers(),
         body: JSON.stringify({
