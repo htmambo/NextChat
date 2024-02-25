@@ -29,7 +29,7 @@ const DEFAULT_SYNC_STATE = {
   useProxy: true,
   proxyUrl: corsPath(ApiPath.Cors),
 
-  githubGist: {
+  CustomREST: {
     endpoint: "",
     username: STORAGE_KEY,
     token: "",

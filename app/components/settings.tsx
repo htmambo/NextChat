@@ -461,56 +461,56 @@ function SyncConfigModal(props: { onClose?: () => void }) {
             </ListItem>
           </List>
         )}
-        {syncStore.provider === ProviderType.GitHubGist && (
+        {syncStore.provider === ProviderType.CustomREST && (
           <>
             <List>
               <ListItem
-                title={Locale.Settings.Sync.Config.GithubGist.Endpoint.Name}
+                title={Locale.Settings.Sync.Config.CustomREST.Endpoint.Name}
                 subTitle={
-                  Locale.Settings.Sync.Config.GithubGist.Endpoint.SubTitle
+                  Locale.Settings.Sync.Config.CustomREST.Endpoint.SubTitle
                 }
               >
                 <input
                   type="text"
-                  value={syncStore.githubGist.endpoint}
+                  value={syncStore.CustomREST.endpoint}
                   onChange={(e) => {
                     syncStore.update(
                       (config) =>
-                        (config.githubGist.endpoint = e.currentTarget.value),
+                        (config.CustomREST.endpoint = e.currentTarget.value),
                     );
                   }}
                 ></input>
               </ListItem>
 
               <ListItem
-                title={Locale.Settings.Sync.Config.GithubGist.FileName.Name}
+                title={Locale.Settings.Sync.Config.CustomREST.UserName.Name}
                 subTitle={
-                  Locale.Settings.Sync.Config.GithubGist.FileName.SubTitle
+                  Locale.Settings.Sync.Config.CustomREST.UserName.SubTitle
                 }
               >
                 <input
                   type="text"
-                  value={syncStore.githubGist.username}
+                  value={syncStore.CustomREST.username}
                   onChange={(e) => {
                     syncStore.update(
                       (config) =>
-                        (config.githubGist.username = e.currentTarget.value),
+                        (config.CustomREST.username = e.currentTarget.value),
                     );
                   }}
                 ></input>
               </ListItem>
               <ListItem
-                title={Locale.Settings.Sync.Config.GithubGist.AccessToken.Name}
+                title={Locale.Settings.Sync.Config.CustomREST.AccessToken.Name}
                 subTitle={
-                  Locale.Settings.Sync.Config.GithubGist.AccessToken.SubTitle
+                  Locale.Settings.Sync.Config.CustomREST.AccessToken.SubTitle
                 }
               >
                 <PasswordInput
-                  value={syncStore.githubGist.token}
+                  value={syncStore.CustomREST.token}
                   onChange={(e) => {
                     syncStore.update(
                       (config) =>
-                        (config.githubGist.token = e.currentTarget.value),
+                        (config.CustomREST.token = e.currentTarget.value),
                     );
                   }}
                 ></PasswordInput>

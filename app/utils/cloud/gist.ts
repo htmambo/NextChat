@@ -3,12 +3,11 @@ import { chunks } from "../format";
 import { SyncStore } from "@/app/store/sync";
 import { corsFetch } from "../cors";
 
-export type GistClient = ReturnType<typeof createGistClient>;
+export type CustomRESTClient = ReturnType<typeof createCustomRESTClient>;
 
-export function createGistClient(store: SyncStore) {
-  const config = store.githubGist;
+export function createCustomRESTClient(store: SyncStore) {
+  const config = store.CustomREST;
   const storeKey = config.username.length === 0 ? STORAGE_KEY : config.username;
-  const token = store.githubGist.token;
   // a proxy disable for a tmp since github doesn't need proxy url
   const proxyUrl =
     store.useProxy && store.proxyUrl.length > 0 ? store.proxyUrl : undefined;
@@ -23,14 +22,14 @@ export function createGistClient(store: SyncStore) {
           mode: "cors",
         });
 
-        console.log("[Gist] check", res.status, res.statusText);
+        console.log("[CustomREST] check", res.status, res.statusText);
         if (res.status === 200) {
           return [200].includes(res.status);
         } else {
           return false;
         }
       } catch (e) {
-        console.error("[Gist] failed to check", e);
+        console.error("[CustomREST] failed to check", e);
       }
       return false;
     },
@@ -44,7 +43,7 @@ export function createGistClient(store: SyncStore) {
       });
 
       console.log(
-        "[Gist] get key = ",
+        "[CustomREST] get key = ",
         storeKey,
         res.status,
         res.statusText,
@@ -67,7 +66,7 @@ export function createGistClient(store: SyncStore) {
       })
         .then((res) => {
           console.log(
-            "[Gist] set key = ",
+            "[CustomREST] set key = ",
             storeKey,
             res.status,
             res.statusText,
@@ -76,7 +75,7 @@ export function createGistClient(store: SyncStore) {
         })
         .catch((error) => {
           console.error(
-            "[Gist] set key = ",
+            "[CustomREST] set key = ",
             storeKey,
             error,
           );

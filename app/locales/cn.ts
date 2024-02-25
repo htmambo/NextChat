@@ -210,15 +210,15 @@ const cn = {
           UserName: "用户名",
           Password: "密码",
         },
-        GithubGist: {
+        CustomREST: {
           Endpoint: {
             Name: "Your REST Url",
             SubTitle:
               "您的 REST Url，例如：https://www.domain.com/anything。",
           },
-          FileName: {
-            Name: "文件名",
-            SubTitle: "文件名，例如：backtrackz.json（必须是 JSON 文件）",
+          UserName: {
+            Name: "备份名称",
+            SubTitle: "备份名称，例如：nextchat。",
           },
           AccessToken: {
             Name: "访问令牌",

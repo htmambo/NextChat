@@ -213,16 +213,16 @@ const en: LocaleType = {
           UserName: "User Name",
           Password: "Password",
         },
-        GithubGist: {
+        CustomREST: {
           Endpoint: {
             Name: "Your REST Url",
             SubTitle:
               "Your REST Url, for example: https://www.domain.com/anything.",
           },
-          FileName: {
-            Name: "File Name",
+          UserName: {
+            Name: "Backup Name",
             SubTitle:
-              "File Name, for example: backtrackz.json (must be a JSON file)",
+              "Backup Name, for example: nextchat.",
           },
           AccessToken: {
             Name: "Access Token",
