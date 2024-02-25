@@ -3,7 +3,6 @@ import { chunks } from "../format";
 import { SyncStore } from "@/app/store/sync";
 import { corsFetch } from "../cors";
 
-export type GistConfig = SyncStore["githubGist"] & { gistId: string };
 export type GistClient = ReturnType<typeof createGistClient>;
 
 export function createGistClient(store: SyncStore) {
