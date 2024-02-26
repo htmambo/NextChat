@@ -24,26 +24,6 @@ export function createGistClient(store: SyncStore) {
     store.useProxy && store.proxyUrl.length > 0 ? store.proxyUrl : undefined;
 
   return {
-
-    async check(): Promise<string> {
-      const res = await corsFetch(this.path(gistId), {
-        method: "GET",
-        headers: this.headers(),
-        proxyUrl,
-        mode: "cors",
-      });
-
-      console.log("[Gist] Check A File Name", res.status, res.statusText);
-
-      if (res.status === 200) {
-        return "success"; // Return success if the Gist exists
-      } else if (res.status === 404) {
-        return "failed"; // Return failed if the Gist doesn't exist
-      }
-
-      return ""; // Return an empty string for other cases
-    },
-
     async create(content: string) {
       const description = `[200 OK] [GithubSync] Last Sync: ${currentDate} Site: ${REPO_URL}`;
 
@@ -57,7 +37,7 @@ export function createGistClient(store: SyncStore) {
         };
       }
 
-      return corsFetch("https://doc.imzhp.com/nextchat/", {
+      return corsFetch("https://api.github.com/gists", {
         method: "POST",
         headers: this.headers(),
         body: JSON.stringify({
@@ -65,8 +45,6 @@ export function createGistClient(store: SyncStore) {
           description,
           files,
         }),
-        proxyUrl,
-        mode: "cors",
       })
         .then((res) => {
           console.log(
@@ -87,6 +65,23 @@ export function createGistClient(store: SyncStore) {
           console.error("[Gist] Create A File Name", `${fileBackup}`, error);
           return null;
         });
+    },
+
+    async check(): Promise<string> {
+      const res = await corsFetch(this.path(gistId), {
+        method: "GET",
+        headers: this.headers(),
+      });
+
+      console.log("[Gist] Check A File Name", res.status, res.statusText);
+
+      if (res.status === 200) {
+        return "success"; // Return success if the Gist exists
+      } else if (res.status === 404) {
+        return "failed"; // Return failed if the Gist doesn't exist
+      }
+
+      return ""; // Return an empty string for other cases
     },
 
     async get() {
@@ -126,8 +121,6 @@ export function createGistClient(store: SyncStore) {
             },
           },
         }),
-        proxyUrl,
-        mode: "cors",
       })
         .then((res) => {
           console.log(
@@ -156,7 +149,7 @@ export function createGistClient(store: SyncStore) {
     },
 
     path(gistId: string) {
-      return `https://doc.imzhp.com/nextchat/${gistId}`;
+      return `https://api.github.com/gists/${gistId}`;
     },
   };
 }

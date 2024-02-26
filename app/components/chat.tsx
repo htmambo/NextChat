@@ -42,6 +42,7 @@ import ChatGptIcon from "../icons/chatgpt.png";
 import EyeOnIcon from "../icons/eye.svg";
 import EyeOffIcon from "../icons/eye-off.svg";
 import { debounce, escapeRegExp } from "lodash";
+import CloseIcon from "../icons/close.svg";
 
 import {
   ChatMessage,
@@ -518,6 +519,7 @@ export function ChatActions(props: {
   showContextPrompts: boolean;
   toggleContextPrompts: () => void;
   uploading: boolean;
+  attachImages: string[];
 }) {
   const config = useAppConfig();
   const navigate = useNavigate();
@@ -547,25 +549,38 @@ export function ChatActions(props: {
   const [showModelSelector, setShowModelSelector] = useState(false);
   const [showUploadImage, setShowUploadImage] = useState(false);
 
+  // this fix memory leak as well, idk why front-end it's so fucking difficult to maintain cause of stupid complex
+  // for front-end developer you literally fucking retarded, write a complex code
   useEffect(() => {
     const show = isVisionModel(currentModel);
-    setShowUploadImage(show);
+    if (showUploadImage !== show) {
+      setShowUploadImage(show);
+    }
+
     if (!show) {
-      props.setAttachImages([]);
-      props.setUploading(false);
+      // Check if there's really a need to update these states to prevent unnecessary re-renders
+      if (props.uploading) {
+        props.setUploading(false);
+      }
+      if (props.attachImages.length !== 0) {
+        props.setAttachImages([]);
+      }
     }
 
     // if current model is not available
     // switch to first available model
-    const isUnavaliableModel = !models.some((m) => m.name === currentModel);
-    if (isUnavaliableModel && models.length > 0) {
+    const isUnavailableModel = !models.some((m) => m.name === currentModel);
+    if (isUnavailableModel && models.length > 0) {
       const nextModel = models[0].name as ModelType;
-      chatStore.updateCurrentSession(
-        (session) => (session.mask.modelConfig.model = nextModel),
-      );
-      showToast(nextModel);
+      // Only update if the next model is different from the current model
+      if (currentModel !== nextModel) {
+        chatStore.updateCurrentSession(
+          (session) => (session.mask.modelConfig.model = nextModel),
+        );
+        showToast(nextModel);
+      }
     }
-  }, [props, chatStore, currentModel, models]);
+  }, [props, chatStore, currentModel, models, showUploadImage]);
 
   return (
     <div className={styles["chat-input-actions"]}>
@@ -824,8 +839,34 @@ function useDebouncedEffect(effect: () => void, deps: any[], delay: number) {
 
 export function DeleteImageButton(props: { deleteImage: () => void }) {
   return (
-    <div className={styles["delete-image"]} onClick={props.deleteImage}>
+    <div
+      className={styles["delete-image"]}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        props.deleteImage();
+      }}
+    >
       <DeleteIcon />
+    </div>
+  );
+}
+
+export function ImageBox(props: {
+  showImageBox: boolean;
+  data: { src: string; alt: string };
+  closeImageBox: () => void;
+}) {
+  return (
+    <div
+      className={styles["image-box"]}
+      style={{ display: props.showImageBox ? "block" : "none" }}
+      onClick={props.closeImageBox}
+    >
+      <img src={props.data.src} alt={props.data.alt} />
+      <div className={styles["image-box-close-button"]}>
+        <CloseIcon />
+      </div>
     </div>
   );
 }
@@ -852,6 +893,8 @@ function _Chat() {
   const isApp = getClientConfig()?.isApp;
   const [attachImages, setAttachImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [showImageBox, setShowImageBox] = useState(false);
+  const [imageBoxData, setImageBoxData] = useState({ src: "", alt: "" });
 
   // prompt hints
   const promptStore = usePromptStore();
@@ -1258,14 +1301,19 @@ function _Chat() {
       setMsgRenderIndex(nextPageMsgIndex);
     }
 
-    setHitBottom(isHitBottom);
-    setAutoScroll(isHitBottom);
+    // Only update state if necessary to prevent infinite loop
+    // this fix memory leaks
+    if (hitBottom !== isHitBottom) {
+      setHitBottom(isHitBottom);
+      setAutoScroll(isHitBottom);
+    }
   }, [
     setHitBottom,
     setAutoScroll,
     isMobileScreen,
     msgRenderIndex,
     setMsgRenderIndex, // Added setMsgRenderIndex
+    hitBottom, // Include hitBottom in the dependency array
   ]);
 
   // Use the custom hook to debounce the onChatBodyScroll function
@@ -1437,48 +1485,58 @@ function _Chat() {
   }, [session.id]);
 
   async function uploadImage() {
-    const images: string[] = [];
-    images.push(...attachImages);
-
-    images.push(
-      ...(await new Promise<string[]>((res, rej) => {
-        const fileInput = document.createElement("input");
-        fileInput.type = "file";
-        fileInput.accept =
-          "image/png, image/jpeg, image/webp, image/heic, image/heif";
-        fileInput.multiple = true;
-        fileInput.onchange = (event: any) => {
-          setUploading(true);
-          const files = event.target.files;
-          const imagesData: string[] = [];
-          for (let i = 0; i < files.length; i++) {
-            const file = event.target.files[i];
-            compressImage(file, 256 * 1024)
-              .then((dataUrl) => {
-                imagesData.push(dataUrl);
-                if (
-                  imagesData.length === 3 ||
-                  imagesData.length === files.length
-                ) {
-                  setUploading(false);
-                  res(imagesData);
-                }
-              })
-              .catch((e) => {
+    const maxImages = 3;
+    if (uploading) return;
+    new Promise<string[]>((res, rej) => {
+      const fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.accept =
+        "image/png, image/jpeg, image/webp, image/heic, image/heif";
+      fileInput.multiple = true;
+      fileInput.onchange = (event: any) => {
+        setUploading(true);
+        const files = event.target.files;
+        const imagesData: string[] = [];
+        for (let i = 0; i < files.length; i++) {
+          const file = event.target.files[i];
+          compressImage(file, 256 * 1024)
+            .then((dataUrl) => {
+              imagesData.push(dataUrl);
+              if (
+                imagesData.length + attachImages.length >= maxImages ||
+                imagesData.length === files.length
+              ) {
                 setUploading(false);
-                rej(e);
-              });
-          }
-        };
-        fileInput.click();
-      })),
-    );
+                res(imagesData);
+              }
+            })
+            .catch((e) => {
+              rej(e);
+            });
+        }
+      };
+      fileInput.click();
+    })
+      .then((imagesData) => {
+        const images: string[] = [];
+        images.push(...attachImages);
+        images.push(...imagesData);
+        setAttachImages(images);
+        const imagesLength = images.length;
+        if (imagesLength > maxImages) {
+          images.splice(maxImages, imagesLength - maxImages);
+        }
+        setAttachImages(images);
+      })
+      .catch(() => {
+        setUploading(false);
+      });
+  }
 
-    const imagesLength = images.length;
-    if (imagesLength > 3) {
-      images.splice(3, imagesLength - 3);
-    }
-    setAttachImages(images);
+  function openImageBox(src: string, alt?: string) {
+    alt = alt ?? "";
+    setImageBoxData({ src, alt });
+    setShowImageBox(true);
   }
 
   // this now better
@@ -1570,7 +1628,11 @@ function _Chat() {
           setShowModal={setShowPromptModal}
         />
       </div>
-
+      <ImageBox
+        showImageBox={showImageBox}
+        data={imageBoxData}
+        closeImageBox={() => setShowImageBox(false)}
+      ></ImageBox>
       <div
         className={styles["chat-body"]}
         ref={scrollRef}
@@ -1725,13 +1787,19 @@ function _Chat() {
                       fontSize={fontSize}
                       parentRef={scrollRef}
                       defaultShow={i >= messages.length - 6}
+                      openImageBox={openImageBox}
                     />
                     {getMessageImages(message).length == 1 && (
-                      <Image
+                      // this fix when uploading
+                      // Note: ignore a fucking stupid "1750:23  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element"
+                      // In scenario how it work, this already handle in other side for example, when you use gemini-pro-vision
+                      <img
                         className={styles["chat-message-item-image"]}
                         src={getMessageImages(message)[0]}
                         alt=""
-                        layout="responsive"
+                        onClick={() =>
+                          openImageBox(getMessageImages(message)[0])
+                        }
                       />
                     )}
                     {getMessageImages(message).length > 1 && (
@@ -1753,6 +1821,7 @@ function _Chat() {
                               src={image}
                               alt=""
                               layout="responsive"
+                              onClick={() => openImageBox(image)}
                             />
                           );
                         })}
@@ -1797,6 +1866,7 @@ function _Chat() {
           }}
           showContextPrompts={false}
           toggleContextPrompts={() => showToast(Locale.WIP)}
+          attachImages={attachImages}
         />
         <label
           className={`${styles["chat-input-panel-inner"]} ${
@@ -1830,6 +1900,7 @@ function _Chat() {
                     key={index}
                     className={styles["attach-image"]}
                     style={{ backgroundImage: `url("${image}")` }}
+                    onClick={() => openImageBox(image)}
                   >
                     <div className={styles["attach-image-mask"]}>
                       <DeleteImageButton
