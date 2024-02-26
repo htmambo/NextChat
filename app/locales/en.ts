@@ -207,7 +207,15 @@ const en: LocaleType = {
           SubTitle:
             "Only applicable to the built-in CORS proxy for this project",
         },
-
+        AccessControl: {
+          Title: "Enable Overwrite Access Control",
+          SubTitle:
+            "Only applicable to the overwrite access control setting such as an access code",
+        },
+        LockClient: {
+          Title: "Enable Do Not Sync Current Data",
+          SubTitle: "Only sync data from other sources, not the current data",
+        },
         WebDav: {
           Endpoint: "WebDAV Endpoint",
           UserName: "User Name",

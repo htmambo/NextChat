@@ -376,6 +376,35 @@ function SyncConfigModal(props: { onClose?: () => void }) {
               ></input>
             </ListItem>
           ) : null}
+          <ListItem
+            title={Locale.Settings.Sync.Config.AccessControl.Title}
+            subTitle={Locale.Settings.Sync.Config.AccessControl.SubTitle}
+          >
+            <input
+              type="checkbox"
+              checked={syncStore.enableAccessControl}
+              onChange={(e) => {
+                syncStore.update(
+                  (config) =>
+                    (config.enableAccessControl = e.currentTarget.checked),
+                );
+              }}
+            ></input>
+          </ListItem>
+          <ListItem
+            title={Locale.Settings.Sync.Config.LockClient.Title}
+            subTitle={Locale.Settings.Sync.Config.LockClient.SubTitle}
+          >
+            <input
+              type="checkbox"
+              checked={syncStore.lockclient}
+              onChange={(e) => {
+                syncStore.update(
+                  (config) => (config.lockclient = e.currentTarget.checked),
+                );
+              }}
+            ></input>
+          </ListItem>
         </List>
 
         {syncStore.provider === ProviderType.WebDAV && (

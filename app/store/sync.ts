@@ -22,12 +22,15 @@ export interface WebDavConfig {
 }
 // alternative fix for tauri
 const isApp = !!getClientConfig()?.isApp;
-export type SyncStore = GetStoreState<typeof useSyncStore>;
+export type SyncStore = GetStoreState<typeof useSyncStore> & {
+  syncing: boolean;
+};
 
 const DEFAULT_SYNC_STATE = {
   provider: ProviderType.WebDAV,
   useProxy: true,
   proxyUrl: corsPath(ApiPath.Cors),
+  enableAccessControl: false,
 
   CustomREST: {
     endpoint: "",
@@ -49,6 +52,9 @@ const DEFAULT_SYNC_STATE = {
 
   lastSyncTime: 0,
   lastProvider: "",
+  lastUpdateTime: 0,
+  syncing: false,
+  lockclient: false,
 };
 
 export const useSyncStore = createPersistStore(
@@ -61,6 +67,7 @@ export const useSyncStore = createPersistStore(
 
     markSyncTime() {
       set({ lastSyncTime: Date.now(), lastProvider: get().provider });
+      set({ lastUpdateTime: Date.now() });
     },
 
     export() {
@@ -95,24 +102,69 @@ export const useSyncStore = createPersistStore(
     },
 
     async sync() {
+      if (get().syncing) {
+        return false;
+      }
+
       const localState = getLocalAppState();
       const provider = get().provider;
       const config = get()[provider];
       const client = this.getClient();
 
       try {
+        set({ syncing: true }); // Set syncing to true before performing the sync
         const remoteState = JSON.parse(
           await client.get(config.username),
         ) as AppState;
-        mergeAppState(localState, remoteState);
-        setLocalAppState(localState);
+
+        if (get().lockclient) {
+          setLocalAppState(remoteState);
+        } else {
+          mergeAppState(localState, remoteState);
+
+          const sessions = localState[StoreKey.Chat].sessions;
+          const currentSession =
+            sessions[localState[StoreKey.Chat].currentSessionIndex];
+          const filteredTopic =
+            currentSession.topic === "New Conversation" &&
+            currentSession.messages.length === 0;
+
+          if (filteredTopic) {
+            const remoteSessions = remoteState[StoreKey.Chat].sessions;
+            const remoteCurrentSession =
+              remoteSessions[remoteState[StoreKey.Chat].currentSessionIndex];
+            const remoteFilteredTopic =
+              remoteCurrentSession.topic === "New Conversation" &&
+              remoteCurrentSession.messages.length > 0;
+
+            if (!remoteFilteredTopic) {
+              localState[StoreKey.Chat].sessions[
+                localState[StoreKey.Chat].currentSessionIndex
+              ].mask = {
+                ...currentSession.mask,
+                name: remoteCurrentSession.mask.name,
+              };
+            }
+          }
+
+          setLocalAppState(localState);
+        }
       } catch (e) {
         console.log("[Sync] failed to get remote state", e);
+
+        if (403) {
+          console.error("[Sync] Sync failed due to '403 Forbidden' error");
+          set({ syncing: false });
+          return false;
+        }
       }
 
       await client.set(config.username, JSON.stringify(localState));
 
       this.markSyncTime();
+      set({ syncing: false });
+
+      return true; // Add the return statement here
     },
 
     async check() {
