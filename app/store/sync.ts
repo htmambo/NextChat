@@ -143,6 +143,8 @@ export const useSyncStore = createPersistStore(
       try {
         set({ syncing: true }); // Set syncing to true before performing the sync
         const rawContent = await client.get(config.filename);
+        console.log(config);
+        console.log(rawContent);
         const remoteState = JSON.parse(rawContent) as AppState;
 
         if (get().lockclient) {
