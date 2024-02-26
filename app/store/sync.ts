@@ -116,7 +116,8 @@ export const useSyncStore = createPersistStore(
         const remoteState = JSON.parse(
           await client.get(config.username),
         ) as AppState;
-
+        
+        if(remoteState) {
         if (get().lockclient) {
           setLocalAppState(remoteState);
         } else {
@@ -148,6 +149,7 @@ export const useSyncStore = createPersistStore(
           }
 
           setLocalAppState(localState);
+        }
         }
       } catch (e) {
         console.log("[Sync] failed to get remote state", e);
