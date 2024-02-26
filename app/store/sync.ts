@@ -117,7 +117,6 @@ export const useSyncStore = createPersistStore(
           await client.get(config.username),
         ) as AppState;
         
-        if(remoteState) {
         if (get().lockclient) {
           setLocalAppState(remoteState);
         } else {
@@ -150,15 +149,9 @@ export const useSyncStore = createPersistStore(
 
           setLocalAppState(localState);
         }
-        }
       } catch (e) {
         console.log("[Sync] failed to get remote state", e);
 
-        if (403) {
-          console.error("[Sync] Sync failed due to '403 Forbidden' error");
-          set({ syncing: false });
-          return false;
-        }
       }
 
       await client.set(config.username, JSON.stringify(localState));
