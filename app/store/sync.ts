@@ -124,8 +124,6 @@ export const useSyncStore = createPersistStore(
           if (
             remoteState[StoreKey.Chat].sessions.length > 0
             ||
-            remoteState[StoreKey.Prompt].prompts.length > 0
-            ||
             remoteState[StoreKey.Mask].masks.length > 0
             ||
             remoteState[StoreKey.Config].config.length > 0
