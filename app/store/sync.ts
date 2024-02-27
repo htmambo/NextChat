@@ -118,7 +118,8 @@ export const useSyncStore = createPersistStore(
         ) as AppState;
         console.log('lockclient', get().lockclient);
         console.log(remoteState);
-        if (get().lockclient) {
+        mergeAppState(localState, remoteState);
+        if (get().lockclient && remoteState.length > 0) {
           setLocalAppState(remoteState);
         } else {
           mergeAppState(localState, remoteState);
