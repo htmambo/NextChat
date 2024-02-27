@@ -119,8 +119,10 @@ export const useSyncStore = createPersistStore(
         console.log('lockclient', get().lockclient);
         console.log(remoteState);
         mergeAppState(localState, remoteState);
-        if (get().lockclient && remoteState.length > 0) {
-          setLocalAppState(remoteState);
+        if (get().lockclient) {
+          if (remoteState[StoreKey.Chat].sessions.length > 0) {
+            setLocalAppState(remoteState);
+          }
         } else {
           mergeAppState(localState, remoteState);
 
