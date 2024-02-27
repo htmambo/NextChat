@@ -108,16 +108,10 @@ const MergeStates: StateMerger = {
     return localState;
   },
   [StoreKey.Mask]: (localState, remoteState) => {
-    const uniqueMasks = new Set();
-    const mergedMasks = [];
-    for (const mask of [...localState.masks, ...remoteState.masks]) {
-      let maskContent = mask.context[0].content;
-      if (!uniqueMasks.has(maskContent)) {
-        uniqueMasks.add(maskContent);
-        mergedMasks.push(mask);
-      }
-    }
-    localState.masks = mergedMasks;
+    localState.masks = {
+      ...remoteState.masks,
+      ...localState.masks,
+    };
     return localState;
   },
   [StoreKey.Config]: mergeWithUpdate<AppState[StoreKey.Config]>,
