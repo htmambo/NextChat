@@ -113,53 +113,43 @@ export const useSyncStore = createPersistStore(
 
       try {
         set({ syncing: true }); // Set syncing to true before performing the sync
-        let remoteData = await client.get(config.username);
-        console.log('remoteData', remoteData);
-        const remoteState = JSON.parse(
-          remoteData,
+        const tmpRemoteState = JSON.parse(
+          await client.get(config.username),
         ) as AppState;
-        console.log('lockclient', get().lockclient);
-        console.log(remoteState);
-
+        // 替换remoteState中的access-control、app-config为localState中的值
+        const remoteState = { ...tmpRemoteState };
         if (get().lockclient) {
-          // remoteState中任意元素不为空则更新本地状态
-          if (
-            Object.values(remoteState).some(
-              (value) => value !== null && value !== undefined,
-            )
-          ) {
-            setLocalAppState(remoteState);
-          }
-        } else {
-          mergeAppState(localState, remoteState);
-
-          const sessions = localState[StoreKey.Chat].sessions;
-          const currentSession =
-            sessions[localState[StoreKey.Chat].currentSessionIndex];
-          const filteredTopic =
-            currentSession.topic === "New Conversation" &&
-            currentSession.messages.length === 0;
-
-          if (filteredTopic) {
-            const remoteSessions = remoteState[StoreKey.Chat].sessions;
-            const remoteCurrentSession =
-              remoteSessions[remoteState[StoreKey.Chat].currentSessionIndex];
-            const remoteFilteredTopic =
-              remoteCurrentSession.topic === "New Conversation" &&
-              remoteCurrentSession.messages.length > 0;
-
-            if (!remoteFilteredTopic) {
-              localState[StoreKey.Chat].sessions[
-                localState[StoreKey.Chat].currentSessionIndex
-              ].mask = {
-                ...currentSession.mask,
-                name: remoteCurrentSession.mask.name,
-              };
-            }
-          }
-
-          setLocalAppState(localState);
+          // 如果lockclient为true，不同步access-control、app-config。需要生成一个新的用于合并的变量，因为remoteState是只读的
+          remoteState[StoreKey.Access] = localState[StoreKey.Access];
+          remoteState[StoreKey.Config] = localState[StoreKey.Config];
         }
+        mergeAppState(localState, remoteState);
+        const sessions = localState[StoreKey.Chat].sessions;
+        const currentSession =
+          sessions[localState[StoreKey.Chat].currentSessionIndex];
+        const filteredTopic =
+          currentSession.topic === "New Conversation" &&
+          currentSession.messages.length === 0;
+
+        if (filteredTopic) {
+          const remoteSessions = remoteState[StoreKey.Chat].sessions;
+          const remoteCurrentSession =
+            remoteSessions[remoteState[StoreKey.Chat].currentSessionIndex];
+          const remoteFilteredTopic =
+            remoteCurrentSession.topic === "New Conversation" &&
+            remoteCurrentSession.messages.length > 0;
+
+          if (!remoteFilteredTopic) {
+            localState[StoreKey.Chat].sessions[
+              localState[StoreKey.Chat].currentSessionIndex
+            ].mask = {
+              ...currentSession.mask,
+              name: remoteCurrentSession.mask.name,
+            };
+          }
+        }
+
+        setLocalAppState(localState);
       } catch (e) {
         console.log("[Sync] failed to get remote state", e);
 
