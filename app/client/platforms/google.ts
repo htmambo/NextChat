@@ -216,7 +216,7 @@ export class GeminiProApi implements LLMApi {
       let googleChatPath = multimodal ? Google.VisionChatPath : Google.ChatPath;
       let chatPath = this.path(googleChatPath);
 
-      let baseUrl = accessStore.googleUrl;
+      // let baseUrl = accessStore.googleUrl;
 
       if (!baseUrl) {
         baseUrl = isApp
@@ -233,9 +233,7 @@ export class GeminiProApi implements LLMApi {
         signal: controller.signal,
         headers: getHeaders(),
       };
-      const accessStore = useAccessStore.getState();
 
-      let baseUrl = accessStore.googleUrl;
       let googleApiKey = accessStore.googleApiKey;
       if (baseUrl.length !== 0 && googleApiKey.length !== 0) {
         // 如果baseUrl的最后一个字符是"/"，则删除
