@@ -216,7 +216,7 @@ export class GeminiProApi implements LLMApi {
       let googleChatPath = multimodal ? Google.VisionChatPath : Google.ChatPath;
       let chatPath = this.path(googleChatPath);
 
-      // let baseUrl = accessStore.googleUrl;
+      let baseUrl = accessStore.googleUrl;
 
       if (!baseUrl) {
         baseUrl = isApp
