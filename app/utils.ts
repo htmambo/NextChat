@@ -38,53 +38,53 @@ export async function copyToClipboard(text: string) {
   }
 }
 
-export async function downloadAs(text: string, filename: string) {
-  if (window.__TAURI__) {
-    const result = await window.__TAURI__.dialog.save({
-      defaultPath: `${filename}`,
-      filters: [
-        {
-          name: `${filename.split('.').pop()} files`,
-          extensions: [`${filename.split('.').pop()}`],
-        },
-        {
-          name: "All Files",
-          extensions: ["*"],
-        },
-      ],
-    });
+export async function downloadAs(json: string, filename: string) {
+  const blob = new Blob([json], { type: "application/json" });
+  const arrayBuffer = await blob.arrayBuffer();
+  const uint8Array = new Uint8Array(arrayBuffer);
 
-    if (result !== null) {
-      try {
-        // await window.__TAURI__.fs.writeBinaryFile(
-        //     result,
-        //     new Uint8Array([...text].map((c) => c.charCodeAt(0)))
-        // );
-        // 修复客户端导出json时的乱码现象
-        const encoder = new TextEncoder();
-        const data = encoder.encode(text);
-        await window.__TAURI__.fs.writeBinaryFile(result, new Uint8Array(data));
+  try {
+    if (window.__TAURI__) {
+      /**
+       * Fixed client app [Tauri]
+       * Resolved the issue where files couldn't be saved when there was a `:` in the dialog.
+      **/
+      const fileName = filename.replace(/:/g, '');
+      const fileExtension = fileName.split('.').pop();
+      const result = await window.__TAURI__.dialog.save({
+        defaultPath: `${fileName}`,
+        filters: [
+          {
+            name: `${fileExtension} files`,
+            extensions: [`${fileExtension}`],
+          },
+          {
+            name: "All Files",
+            extensions: ["*"],
+          },
+        ],
+      });
+
+      if (result !== null) {
+        await window.__TAURI__.fs.writeBinaryFile(
+          result,
+          Uint8Array.from(uint8Array)
+        );
         showToast(Locale.Download.Success);
-      } catch (error) {
+      } else {
         showToast(Locale.Download.Failed);
       }
     } else {
-      showToast(Locale.Download.Failed);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `${filename}`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      showToast(Locale.Download.Success);
     }
-  } else {
-    const element = document.createElement("a");
-    element.setAttribute(
-      "href",
-      "data:text/plain;charset=utf-8," + encodeURIComponent(text),
-    );
-    element.setAttribute("download", filename);
-
-    element.style.display = "none";
-    document.body.appendChild(element);
-
-    element.click();
-
-    document.body.removeChild(element);
+  } catch (error) {
+    showToast(Locale.Download.Failed);
   }
 }
 
