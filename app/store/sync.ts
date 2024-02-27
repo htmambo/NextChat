@@ -121,7 +121,17 @@ export const useSyncStore = createPersistStore(
 
         if (get().lockclient) {
           // remoteState中任意元素不为空则更新本地状态
-          if (Object.values(remoteState).some((v) => v.length > 0)) {
+          if (
+            remoteState[StoreKey.Chat].sessions.length > 0
+            ||
+            remoteState[StoreKey.Prompt].prompts.length > 0
+            ||
+            remoteState[StoreKey.Mask].masks.length > 0
+            ||
+            remoteState[StoreKey.Config].config.length > 0
+            ||
+            remoteState[StoreKey.Access].access.length > 0
+          ) {
             setLocalAppState(remoteState);
           }
         } else {
