@@ -116,7 +116,8 @@ export const useSyncStore = createPersistStore(
         const remoteState = JSON.parse(
           await client.get(config.username),
         ) as AppState;
-        
+        console.log('lockclient', get().lockclient);
+        console.log(remoteState);
         if (get().lockclient) {
           setLocalAppState(remoteState);
         } else {
