@@ -113,8 +113,10 @@ export const useSyncStore = createPersistStore(
 
       try {
         set({ syncing: true }); // Set syncing to true before performing the sync
+        let remoteData = await client.get(config.username);
+        console.log('remoteData', remoteData);
         const remoteState = JSON.parse(
-          await client.get(config.username),
+          remoteData,
         ) as AppState;
         console.log('lockclient', get().lockclient);
         console.log(remoteState);
@@ -122,13 +124,9 @@ export const useSyncStore = createPersistStore(
         if (get().lockclient) {
           // remoteState中任意元素不为空则更新本地状态
           if (
-            remoteState[StoreKey.Chat].sessions.length > 0
-            ||
-            remoteState[StoreKey.Mask].masks.length > 0
-            ||
-            remoteState[StoreKey.Config].config.length > 0
-            ||
-            remoteState[StoreKey.Access].access.length > 0
+            Object.values(remoteState).some(
+              (value) => value !== null && value !== undefined,
+            )
           ) {
             setLocalAppState(remoteState);
           }
