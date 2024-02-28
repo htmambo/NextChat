@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 
 import styles from "./settings.module.scss";
 
@@ -551,6 +551,201 @@ function SyncConfigModal(props: { onClose?: () => void }) {
     </div>
   );
 }
+/** 
+ * Manage Local Data
+ * Author : @H0llyW00dzZ
+ * WIP
+ **/
+
+function LocalDataModal(props: { onClose?: () => void }) {
+  const [showLocalData, setShowLocalData] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const chatStore = useChatStore();
+  const promptStore = usePromptStore();
+  const maskStore = useMaskStore();
+  const builtinCount = SearchService.count.builtin;
+  const customCount = promptStore.getUserPrompts().length ?? 0;
+  const stateOverview = useMemo(() => {
+    const sessions = chatStore.sessions;
+    const messageCount = sessions.reduce((p, c) => p + c.messages.length, 0);
+
+    return {
+      chat: sessions.length,
+      message: messageCount,
+      prompt: Object.keys(promptStore.prompts).length,
+      mask: Object.keys(maskStore.masks).length,
+    };
+  }, [chatStore.sessions, maskStore.masks, promptStore.prompts]);
+
+  const handleExportChat = async () => {
+    if (exporting) return;
+    setExporting(true);
+    const currentDate = new Date();
+    const sessions = chatStore.sessions;
+    const totalMessageCount = sessions.reduce((count, session) => count + session.messages.length, 0);
+    const datePart = getClientConfig()?.isApp
+      ? `${currentDate.toLocaleDateString().replace(/\//g, '_')} ${currentDate.toLocaleTimeString().replace(/:/g, '_')}`
+      : `${currentDate.toLocaleString().replace(/:/g, '_')}`;
+    const formattedMessageCount = Locale.ChatItem.ChatItemCount(totalMessageCount);
+    const fileName = `(${formattedMessageCount})-${datePart}.json`;
+    await downloadAs(sessions, fileName);
+    setExporting(false);
+  };
+
+  const chatStoreRef = useRef(chatStore);
+
+  const handleImportChat = useMemo(
+    () => async () => {
+      await readFromFile().then((content) => {
+        try {
+          const importedData = JSON.parse(content);
+          const sessions = importedData.map((sessionData: ChatSession) => ({
+            ...sessionData,
+            id: nanoid(),
+          }));
+          chatStoreRef.current.sessions = sessions; // Update the sessions using the ref
+          showToast(Locale.Settings.Sync.ImportChatSuccess);
+        } catch (e) {
+          showToast(Locale.Settings.Sync.ImportFailed);
+          console.error(e);
+        }
+      });
+    },
+    [chatStoreRef]
+  );
+
+  const handleExportPrompts = async () => {
+    if (exporting) return;
+    setExporting(true);
+    const currentDate = new Date();
+    const prompts = promptStore.prompts;
+    const promptCount = Object.keys(prompts).length;
+    const datePart = getClientConfig()?.isApp
+      ? `${currentDate.toLocaleDateString().replace(/\//g, '_')} ${currentDate.toLocaleTimeString().replace(/:/g, '_')}`
+      : `${currentDate.toLocaleString().replace(/:/g, '_')}`;
+    const fileName = `prompts_${promptCount}_${datePart}.json`;
+    await downloadAs(prompts, fileName);
+    setExporting(false);
+  };
+// Fix Warning while building into a binary (desktop app known as tauri)
+  const handleImportPrompts = useMemo(
+    () => async () => {
+      await readFromFile().then((content) => {
+        try {
+          const importedData = JSON.parse(content);
+          promptStore.prompts = importedData; // Update the prompts in the store
+          showToast(Locale.Settings.Sync.ImportPromptsSuccess);
+        } catch (e) {
+          showToast(Locale.Settings.Sync.ImportFailed);
+          console.error(e);
+        }
+      });
+    },
+    // promptStore should be included in the dependency array
+    [promptStore]
+  );
+
+  return (
+    <div className="modal-mask">
+      <Modal
+        title={Locale.Settings.Sync.LocalState}
+        onClose={() => props.onClose?.()}
+        actions={[
+          <CheckButton key="check" />,
+          <IconButton
+            key="confirm"
+            onClick={props.onClose}
+            icon={<ConfirmIcon />}
+            bordered
+            text={Locale.UI.Confirm}
+          />,
+        ]}
+      >
+        <List>
+          <ListItem
+            title={Locale.Settings.Sync.Description.Chat(stateOverview).title}
+            subTitle={Locale.Settings.Sync.Description.Chat(stateOverview).description}
+          >
+            <div style={{ display: "flex" }}>
+              <IconButton
+                icon={<UploadIcon />}
+                text={Locale.UI.Export}
+                onClick={handleExportChat}
+              />
+              <IconButton
+                icon={<DownloadIcon />}
+                text={Locale.UI.Import}
+                onClick={handleImportChat}
+              />
+              <IconButton
+                icon={<ClearIcon />}
+                text={Locale.Settings.Danger.Clear.Action}
+                onClick={async () => {
+                  if (await showConfirm(Locale.Settings.Danger.Clear.Confirm)) {
+                    chatStore.clearChatData();
+                  }
+                }}
+              />
+            </div>
+          </ListItem>
+          <ListItem
+            title={Locale.Settings.Sync.Description.Masks(stateOverview).title}
+            subTitle={Locale.Settings.Sync.Description.Masks(stateOverview).description}
+          >
+            <div style={{ display: "flex" }}>
+              <IconButton
+                icon={<UploadIcon />}
+                text={Locale.UI.Export}
+                onClick={() => {
+                  showToast(Locale.WIP);
+                }}
+              />
+              <IconButton
+                icon={<DownloadIcon />}
+                text={Locale.UI.Import}
+                onClick={() => {
+                  showToast(Locale.WIP);
+                }}
+              />
+            </div>
+          </ListItem>
+          <ListItem
+            title={Locale.Settings.Sync.Description.Prompt(stateOverview).title}
+            subTitle={Locale.Settings.Prompt.ListCount(
+              builtinCount,
+              customCount,
+            )}
+          >
+            <div style={{ display: "flex" }}>
+              <IconButton
+                icon={<UploadIcon />}
+                text={Locale.UI.Export}
+                onClick={handleExportPrompts}
+              />
+              <IconButton
+                icon={<DownloadIcon />}
+                text={Locale.UI.Import}
+                onClick={handleImportPrompts}
+              />
+              <IconButton
+                icon={<ClearIcon />}
+                text={Locale.Settings.Danger.Clear.Action}
+                onClick={async () => {
+                  if (await showConfirm(Locale.Settings.Danger.Clear.Confirm)) {
+                    promptStore.clearUserPrompts();
+                  }
+                }}
+              />
+            </div>
+          </ListItem>
+        </List>
+        {showLocalData && (
+          <LocalDataModal onClose={() => setShowLocalData(false)} />
+        )}
+      </Modal>
+    </div>
+  );
+}
 
 function SyncItems() {
   const syncStore = useSyncStore();
@@ -562,6 +757,7 @@ function SyncItems() {
   }, [syncStore]);
 
   const [showSyncConfigModal, setShowSyncConfigModal] = useState(false);
+  const [showLocalData, setShowLocalData] = useState(false);
 
   const stateOverview = useMemo(() => {
     const sessions = chatStore.sessions;
@@ -620,6 +816,13 @@ function SyncItems() {
         >
           <div style={{ display: "flex" }}>
             <IconButton
+              icon={<EditIcon />}
+              text={Locale.UI.Manage}
+              onClick={() => {
+                setShowLocalData(true);
+              }}
+            />
+            <IconButton
               icon={<UploadIcon />}
               text={Locale.UI.Export}
               onClick={() => {
@@ -639,6 +842,10 @@ function SyncItems() {
 
       {showSyncConfigModal && (
         <SyncConfigModal onClose={() => setShowSyncConfigModal(false)} />
+      )}
+
+      {showLocalData && (
+        <LocalDataModal onClose={() => setShowLocalData(false)} />
       )}
     </>
   );

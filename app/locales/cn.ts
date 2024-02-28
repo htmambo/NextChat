@@ -220,7 +220,7 @@ const cn = {
         },
         CustomREST: {
           Endpoint: {
-            Name: "Your REST Url",
+            Name: "自定义服务器",
             SubTitle:
               "您的 REST Url，例如：https://www.domain.com/anything。",
           },
@@ -245,7 +245,26 @@ const cn = {
       Overview: (overview: any) => {
         return `${overview.chat} 次对话，${overview.message} 条消息，${overview.prompt} 条提示词，${overview.mask} 个面具`;
       },
+      Description: {
+        Chat: (overview: any) => {
+          const title = "对话";
+          const description = `${overview.chat} 次对话，, ${overview.message} 条消息`;
+          return { title, description };
+        },
+        Prompt: (overview: any) => {
+          const title = "提示词";
+          const description = `${overview.prompt} 条提示词`;
+          return { title, description };
+        },
+        Masks: (overview: any) => {
+          const title = "面具";
+          const description = `${overview.mask} 个面具`;
+          return { title, description };
+        },
+      },
       ImportFailed: "导入失败",
+      ImportChatSuccess: "聊天数据导入成功。",
+      ImportPromptsSuccess: "成功导入 Prompts 数据。",
     },
     Mask: {
       Splash: {
@@ -476,11 +495,13 @@ const cn = {
     Cancel: "取消",
     Close: "关闭",
     Create: "新建",
+    Continue: "继续",
     Edit: "编辑",
     Export: "导出",
     Import: "导入",
     Sync: "同步",
     Config: "配置",
+    Manage: "管理",
     Slogan: "构建属于你自己的AI助手！",
   },
   Exporter: {
