@@ -498,11 +498,13 @@ const en: LocaleType = {
     Cancel: "Cancel",
     Close: "Close",
     Create: "Create",
+    Continue: "Continue",
     Edit: "Edit",
     Export: "Export",
     Import: "Import",
     Sync: "Sync",
     Config: "Config",
+    Manage: "Manage",
     Slogan: "Build your own AI assistant.",
   },
   Exporter: {
