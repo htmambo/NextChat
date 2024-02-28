@@ -61,7 +61,7 @@ const DEFAULT_SYNC_STATE = {
     endpoint: "",
     username: STORAGE_KEY,
     apiKey: "",
-    filename: "",
+    filename: STORAGE_KEY,
   },
 
   gosync: {
