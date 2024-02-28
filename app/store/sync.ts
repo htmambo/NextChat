@@ -82,10 +82,17 @@ const isApp = !!getClientConfig()?.isApp;
 export const useSyncStore = createPersistStore(
   DEFAULT_SYNC_STATE,
   (set, get) => ({
-    countSync() {
-      const config = get()[get().provider];
-      return Object.values(config).every((c) => c.toString().length > 0);
-    },
+  cloudSync() {
+    const config = get()[get().provider];
+    let allValuesFilled = true;
+    for (let key in config) {
+        if (config[key].toString().length === 0) {
+            console.log(`Key '${key}' 的值为空`);
+            allValuesFilled = false;
+        }
+    }
+    return allValuesFilled;
+  },
 
     markSyncTime(provider: ProviderType) {
       set({ lastSyncTime: Date.now(), lastProvider: provider });
