@@ -672,6 +672,7 @@ const en: LocaleType = {
     Sync: "Sync",
     Config: "Config",
     Manage: "Manage",
+    Slogan: "Build your own AI assistant.",
   },
   // don't linting this `System_Template` keep format like this
   // this a object not string

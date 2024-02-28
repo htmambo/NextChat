@@ -666,6 +666,7 @@ const cn = {
     Sync: "同步",
     Config: "配置",
     Manage: "管理",
+    Slogan: "构建属于你自己的AI助手！",
   },
   // don't linting this `System_Template` keep format like this
   // this a object not string

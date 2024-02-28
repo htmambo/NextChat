@@ -615,7 +615,7 @@ export function ImagePreviewer(props: {
           <div>
             <div className={styles["main-title"]}>NextChat</div>
             <div className={styles["sub-title"]}>
-              Build your own AI assistant.
+              {Locale.UI.Slogan}
             </div>
             <div className={styles["icons"]}>
               <ExportAvatar avatar={config.avatar} />

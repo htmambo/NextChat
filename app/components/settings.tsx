@@ -499,7 +499,7 @@ function SyncConfigModal(props: { onClose?: () => void }) {
                 onChange={(e) => {
                   syncStore.update(
                     (config) =>
-                      (config.upstash.username = e.currentTarget.value),
+                      (config.upstash.username = e.currentTarget.value;config.upstash.filename = e.currentTarget.value;),
                   );
                 }}
               ></input>
