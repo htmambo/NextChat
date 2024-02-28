@@ -94,8 +94,6 @@ export const getServerSideConfig = () => {
     codes: ACCESS_CODES,
 
     proxyUrl: process.env.PROXY_URL,
-    isVercel: !!process.env.VERCEL,
-    isVercelWebAnalytics: !!process.env.VERCEL_ANALYTICS,
 
     hideUserApiKey: !!process.env.HIDE_USER_API_KEY,
     disableGPT4,
