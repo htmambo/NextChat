@@ -40,6 +40,7 @@ import {
   useUpdateStore,
   useAccessStore,
   useAppConfig,
+  ChatSession,
 } from "../store";
 
 import Locale, {
