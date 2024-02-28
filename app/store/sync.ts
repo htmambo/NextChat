@@ -156,11 +156,13 @@ export const useSyncStore = createPersistStore(
         ) as AppState;
         // 替换remoteState中的access-control、app-config为localState中的值
         const remoteState = { ...tmpRemoteState };
+	console.log(remoteState);
         if (get().lockclient) {
           // 如果lockclient为true，不同步access-control、app-config。需要生成一个新的用于合并的变量，因为remoteState是只读的
           remoteState[StoreKey.Access] = localState[StoreKey.Access];
           remoteState[StoreKey.Config] = localState[StoreKey.Config];
         }
+	console.log(remoteState);
         mergeAppState(localState, remoteState);
         const sessions = localState[StoreKey.Chat].sessions;
         const currentSession =
@@ -194,23 +196,6 @@ export const useSyncStore = createPersistStore(
           e,
           "Will attempt fixing it",
         );
-      }
-
-      if (overwriteAccessControl !== false) { // default is false ref #DEFAULT_SYNC_STATE
-        const accessControl = localState['access-control'];
-        // Assuming user's local state has properties that you want to use to overwrite accessControl
-        const userLocalState = getLocalAppState();
-        accessControl.openaiApiKey = userLocalState["access-control"].openaiApiKey;
-        accessControl.accessCode = userLocalState["access-control"].accessCode;
-        accessControl.needCode = userLocalState["access-control"].needCode;
-        accessControl.hideUserApiKey = userLocalState["access-control"].hideUserApiKey;
-        accessControl.hideBalanceQuery = userLocalState["access-control"].hideBalanceQuery;
-        accessControl.disableGPT4 = userLocalState["access-control"].disableGPT4;
-        accessControl.openaiUrl = userLocalState["access-control"].openaiUrl;
-        accessControl.azureApiKey = userLocalState["access-control"].azureApiKey;
-        accessControl.azureUrl = userLocalState["access-control"].azureUrl;
-        accessControl.azureApiVersion = userLocalState["access-control"].azureApiVersion;
-        accessControl.useCustomConfig = userLocalState["access-control"].useCustomConfig;
       }
 
       if (provider === ProviderType.CustomREST) {
