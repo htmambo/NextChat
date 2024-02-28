@@ -142,53 +142,49 @@ export const useSyncStore = createPersistStore(
 
       try {
         set({ syncing: true }); // Set syncing to true before performing the sync
-        const rawContent = await client.get(config.filename);
-        const remoteState = JSON.parse(rawContent) as AppState;
-
+        const tmpRemoteState = JSON.parse(
+          await client.get(config.filename),
+        ) as AppState;
+        // 替换remoteState中的access-control、app-config为localState中的值
+        const remoteState = { ...tmpRemoteState };
         if (get().lockclient) {
-          setLocalAppState(remoteState);
-        } else {
-          mergeAppState(localState, remoteState);
-
-          const sessions = localState[StoreKey.Chat].sessions;
-          const currentSession =
-            sessions[localState[StoreKey.Chat].currentSessionIndex];
-          const filteredTopic =
-            currentSession.topic === "New Conversation" &&
-            currentSession.messages.length === 0;
-
-          if (filteredTopic) {
-            const remoteSessions = remoteState[StoreKey.Chat].sessions;
-            const remoteCurrentSession =
-              remoteSessions[remoteState[StoreKey.Chat].currentSessionIndex];
-            const remoteFilteredTopic =
-              remoteCurrentSession.topic === "New Conversation" &&
-              remoteCurrentSession.messages.length > 0;
-
-            if (!remoteFilteredTopic) {
-              localState[StoreKey.Chat].sessions[
-                localState[StoreKey.Chat].currentSessionIndex
-              ].mask = {
-                ...currentSession.mask,
-                name: remoteCurrentSession.mask.name,
-              };
-            }
-          }
-
-          setLocalAppState(localState);
+          // 如果lockclient为true，不同步access-control、app-config。需要生成一个新的用于合并的变量，因为remoteState是只读的
+          remoteState[StoreKey.Access] = localState[StoreKey.Access];
+          remoteState[StoreKey.Config] = localState[StoreKey.Config];
         }
+        mergeAppState(localState, remoteState);
+        const sessions = localState[StoreKey.Chat].sessions;
+        const currentSession =
+          sessions[localState[StoreKey.Chat].currentSessionIndex];
+        const filteredTopic =
+          currentSession.topic === "New Conversation" &&
+          currentSession.messages.length === 0;
+
+        if (filteredTopic) {
+          const remoteSessions = remoteState[StoreKey.Chat].sessions;
+          const remoteCurrentSession =
+            remoteSessions[remoteState[StoreKey.Chat].currentSessionIndex];
+          const remoteFilteredTopic =
+            remoteCurrentSession.topic === "New Conversation" &&
+            remoteCurrentSession.messages.length > 0;
+
+          if (!remoteFilteredTopic) {
+            localState[StoreKey.Chat].sessions[
+              localState[StoreKey.Chat].currentSessionIndex
+            ].mask = {
+              ...currentSession.mask,
+              name: remoteCurrentSession.mask.name,
+            };
+          }
+        }
+
+        setLocalAppState(localState);
       } catch (e) {
         console.log(
           `[Sync] Failed to get remote state from file '${config.filename}' for provider ['${provider}']:`,
           e,
           "Will attempt fixing it",
         );
-
-        if (403) {
-          console.error("[Sync] Sync failed due to '403 Forbidden' error");
-          set({ syncing: false });
-          return false;
-        }
       }
 
       if (overwriteAccessControl !== false) { // default is false ref #DEFAULT_SYNC_STATE
