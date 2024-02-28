@@ -1,3 +1,4 @@
+import { getClientConfig } from "./config/client";
 import { useEffect, useState } from "react";
 import { showToast } from "./components/ui-lib";
 import Locale from "./locales";
@@ -9,13 +10,16 @@ export function trimTopic(topic: string) {
   // This will remove the specified punctuation from the end of the string
   // and also trim quotes from both the start and end if they exist.
   return topic
-    .replace(/^["“”]+|["“”]+$/g, "")
-    .replace(/[，。！？”“"、,.!?]*$/, "");
+    // fix for gemini
+    .replace(/^["“”*]+|["“”*]+$/g, "")
+    .replace(/[，。！？”“"、,.!?*]*$/, "");
 }
+
+const isApp = !!getClientConfig()?.isApp;
 
 export async function copyToClipboard(text: string) {
   try {
-    if (window.__TAURI__) {
+    if (isApp && window.__TAURI__) {
       window.__TAURI__.writeText(text);
     } else {
       await navigator.clipboard.writeText(text);

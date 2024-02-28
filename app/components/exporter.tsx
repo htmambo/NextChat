@@ -546,7 +546,7 @@ export function ImagePreviewer(props: {
           <div>
             <div className={styles["main-title"]}>NextChat</div>
             <div className={styles["sub-title"]}>
-              github.com/htmambo/NextChat
+              {Locale.UI.Slogan}
             </div>
             <div className={styles["icons"]}>
               <ExportAvatar avatar={config.avatar} />

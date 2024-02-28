@@ -481,6 +481,7 @@ const cn = {
     Import: "导入",
     Sync: "同步",
     Config: "配置",
+    Slogan: "构建属于你自己的AI助手！",
   },
   Exporter: {
     Description: {

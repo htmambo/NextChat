@@ -484,6 +484,7 @@ const en: LocaleType = {
     Import: "Import",
     Sync: "Sync",
     Config: "Config",
+    Slogan: "Build your own AI assistant.",
   },
   Exporter: {
     Description: {

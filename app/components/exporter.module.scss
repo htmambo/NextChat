@@ -137,12 +137,12 @@
       }
 
       .main-title {
-        font-size: 20px;
+        font-size: 25px;
         font-weight: bolder;
       }
 
       .sub-title {
-        font-size: 12px;
+        font-size: 14px;
       }
 
       .icons {
@@ -247,6 +247,12 @@
       }
 
       &-assistant {
+        .body {
+          background-color: var(--white);
+        }
+      }
+
+      &-system {
         .body {
           background-color: var(--white);
         }
