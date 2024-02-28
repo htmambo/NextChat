@@ -48,7 +48,11 @@ import Locale, {
   changeLang,
   getLang,
 } from "../locales";
-import { copyToClipboard } from "../utils";
+import { 
+  copyToClipboard,
+  downloadAs,
+  readFromFile,
+} from "../utils";
 import Link from "next/link";
 import {
   Azure,
@@ -588,7 +592,7 @@ function LocalDataModal(props: { onClose?: () => void }) {
       : `${currentDate.toLocaleString().replace(/:/g, '_')}`;
     const formattedMessageCount = Locale.ChatItem.ChatItemCount(totalMessageCount);
     const fileName = `(${formattedMessageCount})-${datePart}.json`;
-    await downloadAs(sessions, fileName);
+    await downloadAs(JSON.stringify(sessions), fileName);
     setExporting(false);
   };
 
@@ -624,7 +628,7 @@ function LocalDataModal(props: { onClose?: () => void }) {
       ? `${currentDate.toLocaleDateString().replace(/\//g, '_')} ${currentDate.toLocaleTimeString().replace(/:/g, '_')}`
       : `${currentDate.toLocaleString().replace(/:/g, '_')}`;
     const fileName = `prompts_${promptCount}_${datePart}.json`;
-    await downloadAs(prompts, fileName);
+    await downloadAs(JSON.stringify(prompts), fileName);
     setExporting(false);
   };
 // Fix Warning while building into a binary (desktop app known as tauri)
