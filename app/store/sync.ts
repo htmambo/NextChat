@@ -84,9 +84,11 @@ export const useSyncStore = createPersistStore(
   (set, get) => ({
     cloudSync() {
       const config = get()[get().provider] as Record<string, any>;
+      console.log('driver', get().provider);
+      console.log('config', config);
       let allValuesFilled = true;
       for (let key in config) {
-        if (config[key].toString().length === 0) {
+        if (key != 'username' && config[key].toString().length === 0) {
             console.log(`Key '${key}' 的值为空`);
             allValuesFilled = false;
         }
