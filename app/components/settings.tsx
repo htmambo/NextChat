@@ -497,10 +497,11 @@ function SyncConfigModal(props: { onClose?: () => void }) {
                 value={syncStore.upstash.username}
                 placeholder={STORAGE_KEY}
                 onChange={(e) => {
-                  syncStore.update(
-                    (config) =>
-                      (config.upstash.username = e.currentTarget.value;config.upstash.filename = e.currentTarget.value;),
-                  );
+                  syncStore.update((config) => {
+                    config.upstash.username = e.currentTarget.value;
+                    config.upstash.filename = e.currentTarget.value;
+                    return config;
+                  });
                 }}
               ></input>
             </ListItem>
