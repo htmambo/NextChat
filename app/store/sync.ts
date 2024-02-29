@@ -64,7 +64,7 @@ const DEFAULT_SYNC_STATE = {
 export const useSyncStore = createPersistStore(
   DEFAULT_SYNC_STATE,
   (set, get) => ({
-    cloudSync() {
+    couldSync() {
       const config = get()[get().provider];
       return Object.values(config).every((c) => c.toString().length > 0);
     },

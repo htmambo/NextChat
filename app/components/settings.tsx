@@ -272,8 +272,8 @@ function DangerItems() {
 function CheckButton() {
   const syncStore = useSyncStore();
 
-  const couldCheck = useMemo(() => {
-    return syncStore.cloudSync();
+  const couldSync = useMemo(() => {
+    return syncStore.couldSync();
   }, [syncStore]);
 
   const [checkState, setCheckState] = useState<
@@ -286,7 +286,7 @@ function CheckButton() {
     setCheckState(valid ? "success" : "failed");
   }
 
-  if (!couldCheck) return null;
+  if (!couldSync) return null;
 
   return (
     <IconButton
@@ -773,7 +773,7 @@ function SyncItems() {
   const promptStore = usePromptStore();
   const maskStore = useMaskStore();
   const couldSync = useMemo(() => {
-    return syncStore.cloudSync();
+    return syncStore.couldSync();
   }, [syncStore]);
 
   const [showSyncConfigModal, setShowSyncConfigModal] = useState(false);
