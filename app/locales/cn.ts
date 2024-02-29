@@ -205,13 +205,13 @@ const cn = {
           SubTitle: "仅适用于本项目自带的跨域代理",
         },
 
-        AccessControl: {
-          Title: "启用覆盖访问控制",
-          SubTitle: "仅适用于覆盖访问控制设置，例如访问代码",
+        OverwriteLocal: {
+          Title: "覆盖本地",
+          SubTitle: "放弃本地所有数据，使用远程信息直接覆盖本地（不保留本地任何数据）",
         },
-        LockClient: {
-          Title: "启用不同步当前数据",
-          SubTitle: "仅同步其他来源的数据，而不同步当前数据",
+        OnlySyncUserData: {
+          Title: "同步远程数据，忽略配置",
+          SubTitle: "仅同步其他来源的数据，而不同步远程的控制设置",
         },
         WebDav: {
           Endpoint: "WebDAV 地址",

@@ -30,7 +30,6 @@ const DEFAULT_SYNC_STATE = {
   provider: ProviderType.WebDAV,
   useProxy: true,
   proxyUrl: corsPath(ApiPath.Cors),
-  enableAccessControl: false,
 
   CustomREST: {
     endpoint: "",
@@ -54,7 +53,10 @@ const DEFAULT_SYNC_STATE = {
   lastProvider: "",
   lastUpdateTime: 0,
   syncing: false,
-  lockclient: false,
+  // 放弃本地数据，以远程数据完全覆盖本地
+  enableOverwriteLocal: false,
+  // 仅同步用户数据（聊天、自定义面具以及提示）
+  onlysyncuserdata: true,
 };
 
 export const useSyncStore = createPersistStore(
@@ -118,11 +120,11 @@ export const useSyncStore = createPersistStore(
         ) as AppState;
         // 替换remoteState中的access-control、app-config为localState中的值
         const remoteState = { ...tmpRemoteState };
-        if (get().lockclient) {
-          // 如果lockclient为true，不同步access-control、app-config。需要生成一个新的用于合并的变量，因为remoteState是只读的
+        if (get().onlysyncuserdata) {
+          // 如果onlysyncuserdata为true，不同步access-control、app-config。需要生成一个新的用于合并的变量，因为remoteState是只读的
           remoteState[StoreKey.Access] = localState[StoreKey.Access];
           remoteState[StoreKey.Config] = localState[StoreKey.Config];
-        }
+        } 
         mergeAppState(localState, remoteState);
         const sessions = localState[StoreKey.Chat].sessions;
         const currentSession =
