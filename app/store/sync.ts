@@ -238,10 +238,6 @@ export const useSyncStore = createPersistStore(
       }
     },
 
-    setLockClient(value: boolean) {
-      set({ lockclient: value });
-    },
-
     async check() {
       const client = this.getClient(get().provider);
       return await client.check();
