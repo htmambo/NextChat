@@ -31,6 +31,7 @@ const en: LocaleType = {
         violence: "Violence",
       },
     },
+    TextModerationErr: "We encountered an issue while reviewing your message:",
   },
   Auth: {
     Title: "Need Access Code",
@@ -270,14 +271,19 @@ const en: LocaleType = {
           SubTitle:
             "Only applicable to the built-in CORS proxy for this project",
         },
-        AccessControl: {
-          Title: "Enable Overwrite Access Control",
+        OverwriteLocal: {
+          Title: "Overwrite Local",
           SubTitle:
-            "Only applicable to the overwrite access control setting such as an access code",
+            "Abandon all local data and use remote information to directly overwrite local (without retaining any local data)",
         },
-        LockClient: {
-          Title: "Enable Do Not Sync Current Data",
-          SubTitle: "Only sync data from other sources, not the current data",
+        OverwriteRemote: {
+          Title: "Overwrite Remote",
+          SubTitle:
+            "Drop all data from the remote and use local information to directly overwrite the remote (without retaining any data from the remote)",
+        },
+        OnlySyncUserData: {
+          Title: "Synchronize remote user data, ignore configuration",
+          SubTitle: "Preserve local control settings and synchronize user data with remote merge",
         },
         WebDav: {
           Endpoint: {

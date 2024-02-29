@@ -29,6 +29,7 @@ const cn = {
         violence: "暴力",
       },
     },
+    TextModerationErr: "审核您的消息时遇到问题：",
   },
   Auth: {
     Title: "需要密码",
@@ -267,16 +268,18 @@ const cn = {
           Title: "代理地址",
           SubTitle: "仅适用于本项目自带的跨域代理",
         },
-
-        AccessControl: {
-          Title: "启用覆盖访问控制",
-          SubTitle: "仅适用于覆盖访问控制设置，例如访问代码",
+        OverwriteLocal: {
+          Title: "覆盖本地",
+          SubTitle: "放弃本地所有数据，使用远程信息直接覆盖本地（不保留本地任何数据）",
         },
-        LockClient: {
-          Title: "启用不同步当前数据",
-          SubTitle: "仅同步其他来源的数据，而不同步当前数据",
+        OverwriteRemote: {
+          Title: "覆盖远程",
+          SubTitle: "放弃远程所有数据，使用本地信息直接覆盖远程（不保留远程任何数据）",
         },
-
+        OnlySyncUserData: {
+          Title: "同步远程用户数据，忽略配置",
+          SubTitle: "保留本地控制设置，将用户数据与远程合并后同步",
+        },
         WebDav: {
           Endpoint: {
             Name: "WebDav 终端点",

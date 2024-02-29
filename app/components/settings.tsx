@@ -382,30 +382,45 @@ function SyncConfigModal(props: { onClose?: () => void }) {
             </ListItem>
           ) : null}
           <ListItem
-            title={Locale.Settings.Sync.Config.AccessControl.Title}
-            subTitle={Locale.Settings.Sync.Config.AccessControl.SubTitle}
+            title={Locale.Settings.Sync.Config.OverwriteLocal.Title}
+            subTitle={Locale.Settings.Sync.Config.OverwriteLocal.SubTitle}
           >
             <input
               type="checkbox"
-              checked={syncStore.enableAccessControl}
+              checked={syncStore.enableOverwriteLocal}
               onChange={(e) => {
                 syncStore.update(
                   (config) =>
-                    (config.enableAccessControl = e.currentTarget.checked),
+                    (config.enableOverwriteLocal = e.currentTarget.checked),
                 );
               }}
             ></input>
           </ListItem>
           <ListItem
-            title={Locale.Settings.Sync.Config.LockClient.Title}
-            subTitle={Locale.Settings.Sync.Config.LockClient.SubTitle}
+            title={Locale.Settings.Sync.Config.OverwriteRemote.Title}
+            subTitle={Locale.Settings.Sync.Config.OverwriteRemote.SubTitle}
           >
             <input
               type="checkbox"
-              checked={syncStore.lockclient}
+              checked={syncStore.enableOverwriteRemote}
               onChange={(e) => {
                 syncStore.update(
-                  (config) => (config.lockclient = e.currentTarget.checked),
+                  (config) =>
+                    (config.enableOverwriteRemote = e.currentTarget.checked),
+                );
+              }}
+            ></input>
+          </ListItem>
+          <ListItem
+            title={Locale.Settings.Sync.Config.OnlySyncUserData.Title}
+            subTitle={Locale.Settings.Sync.Config.OnlySyncUserData.SubTitle}
+          >
+            <input
+              type="checkbox"
+              checked={syncStore.onlysyncuserdata}
+              onChange={(e) => {
+                syncStore.update(
+                  (config) => (config.onlysyncuserdata = e.currentTarget.checked),
                 );
               }}
             ></input>
