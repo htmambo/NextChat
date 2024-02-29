@@ -176,7 +176,7 @@ export const useSyncStore = createPersistStore(
           // 2. 覆盖本地所有数据（这时不需要上传到远程，覆盖完直接返回）
           if (get().enableOverwriteLocal) {
             setLocalAppState(tmpRemoteState);
-            this.markSyncTime();
+            this.markSyncTime(provider);
             set({ syncing: false });
             return true; // Add the return statement here
           }
