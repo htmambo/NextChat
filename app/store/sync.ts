@@ -164,7 +164,7 @@ export const useSyncStore = createPersistStore(
         if (get().enableOverwriteRemote) {
         } else {
           const tmpRemoteState = JSON.parse(
-            await client.get(config.username),
+            await client.get(config.filename),
           ) as AppState;
           // 3. 仅同步用户数据（替换remoteState中的access-control、app-config为localState中的值）
           const remoteState = { ...tmpRemoteState };
