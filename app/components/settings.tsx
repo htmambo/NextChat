@@ -397,6 +397,21 @@ function SyncConfigModal(props: { onClose?: () => void }) {
             ></input>
           </ListItem>
           <ListItem
+            title={Locale.Settings.Sync.Config.OverwriteRemote.Title}
+            subTitle={Locale.Settings.Sync.Config.OverwriteRemote.SubTitle}
+          >
+            <input
+              type="checkbox"
+              checked={syncStore.enableOverwriteRemote}
+              onChange={(e) => {
+                syncStore.update(
+                  (config) =>
+                    (config.enableOverwriteRemote = e.currentTarget.checked),
+                );
+              }}
+            ></input>
+          </ListItem>
+          <ListItem
             title={Locale.Settings.Sync.Config.OnlySyncUserData.Title}
             subTitle={Locale.Settings.Sync.Config.OnlySyncUserData.SubTitle}
           >

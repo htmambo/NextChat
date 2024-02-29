@@ -208,13 +208,18 @@ const en: LocaleType = {
             "Only applicable to the built-in CORS proxy for this project",
         },
         OverwriteLocal: {
-          Title: "Full Overwrite",
+          Title: "Overwrite Local",
           SubTitle:
-            "Only applicable to the overwrite access control setting such as an access code",
+            "Abandon all local data and use remote information to directly overwrite local (without retaining any local data)",
+        },
+        OverwriteRemote: {
+          Title: "Overwrite Remote",
+          SubTitle:
+            "Drop all data from the remote and use local information to directly overwrite the remote (without retaining any data from the remote)",
         },
         OnlySyncUserData: {
-          Title: "Synchronize remote data, ignore configuration",
-          SubTitle: "Synchronize only data from other sources, not remote control settings",
+          Title: "Synchronize remote user data, ignore configuration",
+          SubTitle: "Preserve local control settings and synchronize user data with remote merge",
         },
         WebDav: {
           Endpoint: "WebDAV Endpoint",

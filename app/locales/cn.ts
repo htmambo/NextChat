@@ -204,14 +204,17 @@ const cn = {
           Title: "代理地址",
           SubTitle: "仅适用于本项目自带的跨域代理",
         },
-
         OverwriteLocal: {
           Title: "覆盖本地",
           SubTitle: "放弃本地所有数据，使用远程信息直接覆盖本地（不保留本地任何数据）",
         },
+        OverwriteRemote: {
+          Title: "覆盖远程",
+          SubTitle: "放弃远程所有数据，使用本地信息直接覆盖远程（不保留远程任何数据）",
+        },
         OnlySyncUserData: {
-          Title: "同步远程数据，忽略配置",
-          SubTitle: "仅同步其他来源的数据，而不同步远程的控制设置",
+          Title: "同步远程用户数据，忽略配置",
+          SubTitle: "保留本地控制设置，将用户数据与远程合并后同步",
         },
         WebDav: {
           Endpoint: "WebDAV 地址",
