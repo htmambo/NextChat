@@ -178,9 +178,6 @@ export const usePromptStore = createPersistStore(
             case "cn":
               fetchPrompts = res.cn;
               break;
-            case "id":
-              fetchPrompts = res.id;
-              break;
             // Add cases for other languages here
             default:
               fetchPrompts = res.en;
