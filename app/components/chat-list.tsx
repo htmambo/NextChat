@@ -168,9 +168,7 @@ export function ChatList(props: { narrow?: boolean; search: string }) {
             ref={provided.innerRef}
             {...provided.droppableProps}
           >
-            {sessions.map(
-              (item, i) =>
-                haveSearchKeyword(item) && (
+            {sessions.map((item, i) => haveSearchKeyword(item) && (
                   <ChatItem
                     title={item.topic}
                     time={new Date(item.lastUpdate).toLocaleString()}
@@ -194,8 +192,7 @@ export function ChatList(props: { narrow?: boolean; search: string }) {
                     narrow={props.narrow}
                     mask={item.mask}
                   />
-                ),
-            )}
+            ))}
             {provided.placeholder}
           </div>
         )}

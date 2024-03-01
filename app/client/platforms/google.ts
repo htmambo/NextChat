@@ -62,6 +62,9 @@ export class GeminiProApi implements LLMApi {
         i++;
       }
     }
+    // if (visionModel && messages.length > 1) {
+    //   options.onError?.(new Error("Multiturn chat is not enabled for models/gemini-pro-vision"));
+    // }
     const modelConfig = {
       ...useAppConfig.getState().modelConfig,
       ...useChatStore.getState().currentSession().mask.modelConfig,
@@ -112,6 +115,9 @@ export class GeminiProApi implements LLMApi {
         ? Google.VisionChatPath
         : Google.ChatPath;
       let chatPath = this.path(googleChatPath);
+
+      // let baseUrl = accessStore.googleUrl;
+
       if (!baseUrl) {
         baseUrl = isApp
           ? DEFAULT_API_HOST + "/api/proxy/google/" + googleChatPath
@@ -127,18 +133,6 @@ export class GeminiProApi implements LLMApi {
         signal: controller.signal,
         headers: getHeaders(),
       };
-      // let googleApiKey = accessStore.googleApiKey;
-      // if (baseUrl.length !== 0 && googleApiKey.length !== 0) {
-      //   // 如果baseUrl的最后一个字符是"/"，则删除
-      //   if (baseUrl.endsWith("/")) {
-      //     baseUrl = baseUrl.slice(0, baseUrl.length - 1);
-      //   }
-      //   // 删除chatPayload.headers中的authorization
-      //   delete chatPayload.headers["Authorization"];
-      //   chatPath = chatPath.replaceAll("api/google/", "");
-      //   // 重新设置chatPath
-      //   chatPath = `${baseUrl}/${chatPath}?key=${googleApiKey}`;
-      // }
 
       // make a fetch request
       const requestTimeoutId = setTimeout(
@@ -148,10 +142,6 @@ export class GeminiProApi implements LLMApi {
       if (shouldStream) {
         let responseText = "";
         let remainText = "";
-        // let streamChatPath = chatPath.replace(
-        //   "generateContent",
-        //   "streamGenerateContent",
-        // );
         let finished = false;
 
         let existingTexts: string[] = [];
@@ -208,6 +198,7 @@ export class GeminiProApi implements LLMApi {
                     options.onError?.(new Error("Request failed"));
                   }
                 }
+
                 console.log("Stream complete");
                 // options.onFinish(responseText + remainText);
                 finished = true;
