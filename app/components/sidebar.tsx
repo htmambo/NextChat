@@ -140,7 +140,6 @@ export function SideBarContainer(props: {
     [isMobileScreen],
   );
   const { children, className, onDragStart, shouldNarrow } = props;
-  const [chatListSearch, setChatListSearch] = useState("");
   return (
     <div
       className={`${styles.sidebar} ${className} ${
@@ -218,6 +217,7 @@ export function SideBar(props: { className?: string }) {
   const navigate = useNavigate();
   const config = useAppConfig();
   const chatStore = useChatStore();
+  const [chatListSearch, setChatListSearch] = useState("");
 
   return (
     <SideBarContainer
