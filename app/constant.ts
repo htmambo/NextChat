@@ -1,7 +1,7 @@
 import path from "path";
 
 export const OWNER = "htmambo";
-export const REPO = "NextWeb";
+export const REPO = "NextChat";
 export const REPO_URL = `https://github.com/${OWNER}/${REPO}`;
 export const ISSUE_URL = `https://github.com/${OWNER}/${REPO}/issues`;
 export const UPDATE_URL = `${REPO_URL}#keep-updated`;
