@@ -56,8 +56,15 @@ import {
 } from "../utils";
 import Link from "next/link";
 import {
+  Anthropic,
   Azure,
+  Baidu,
+  Tencent,
+  ByteDance,
+  Alibaba,
+  Moonshot,
   Google,
+  GoogleSafetySettingsThreshold,
   OPENAI_BASE_URL,
   Path,
   RELEASE_URL,
@@ -65,6 +72,8 @@ import {
   ServiceProvider,
   SlotID,
   UPDATE_URL,
+  Stability,
+  Iflytek,
 } from "../constant";
 import { Prompt, SearchService, usePromptStore } from "../store/prompt";
 import { ErrorBoundary } from "./error";
@@ -242,6 +251,7 @@ function DangerItems() {
         subTitle={Locale.Settings.Danger.Reset.SubTitle}
       >
         <IconButton
+          aria={Locale.Settings.Danger.Reset.Title}
           text={Locale.Settings.Danger.Reset.Action}
           onClick={async () => {
             if (await showConfirm(Locale.Settings.Danger.Reset.Confirm)) {
@@ -256,6 +266,7 @@ function DangerItems() {
         subTitle={Locale.Settings.Danger.Clear.SubTitle}
       >
         <IconButton
+          aria={Locale.Settings.Danger.Clear.Title}
           text={Locale.Settings.Danger.Clear.Action}
           onClick={async () => {
             if (await showConfirm(Locale.Settings.Danger.Clear.Confirm)) {
@@ -844,6 +855,7 @@ function SyncItems() {
               }}
             />
             <IconButton
+              aria={Locale.Settings.Sync.LocalState + Locale.UI.Export}
               icon={<UploadIcon />}
               text={Locale.UI.Export}
               onClick={() => {
