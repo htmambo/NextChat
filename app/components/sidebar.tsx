@@ -177,7 +177,7 @@ export function SideBarHeader(props: {
           </div>
           <div className={styles["sidebar-sub-title"]}>{subTitle}</div>
         </div>
-        <div className={styles["sidebar-logo"] + " no-dark"}>{logo}</div>
+        <div className={styles["sidebar-logo"] + " no-dark"}><div className={`${styles["animated-logo"]} + no-dark`}>{logo}</div></div>
       </div>
       {children}
     </Fragment>
@@ -228,7 +228,7 @@ export function SideBar(props: { className?: string }) {
       <SideBarHeader
         title="NextChat"
         subTitle={Locale.UI.Slogan}
-        logo={<ChatGptIcon />}
+        logo={<ChatGptIcon className={`${styles["rotate"]} + no-dark`} />}
       >
         <div className={styles["sidebar-header-bar"]}>
           <IconButton
