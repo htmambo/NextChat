@@ -155,6 +155,12 @@ const sk: PartialLocaleType = {
       Title: "Veľkosť písma",
       SubTitle: "Nastaviť veľkosť písma obsahu chatu",
     },
+    FontFamily: {
+      Title: "Chatové Písmo",
+      SubTitle:
+        "Písmo obsahu chatu, ponechajte prázdne pre použitie globálneho predvoleného písma",
+      Placeholder: "Názov Písma",
+    },
     InjectSystemPrompts: {
       Title: "Vložiť systémové výzvy",
       SubTitle: "Vložiť globálnu systémovú výzvu pre každú požiadavku",
@@ -317,6 +323,23 @@ const sk: PartialLocaleType = {
           SubTitle: "Skontrolujte svoju verziu API v Azure konzole",
         },
       },
+      Anthropic: {
+        ApiKey: {
+          Title: "API kľúč Anthropic",
+          SubTitle: "Skontrolujte svoj API kľúč v Anthropic konzole",
+          Placeholder: "API kľúč Anthropic",
+        },
+
+        Endpoint: {
+          Title: "Adresa koncového bodu",
+          SubTitle: "Príklad:",
+        },
+
+        ApiVerion: {
+          Title: "Verzia API (claude verzia API)",
+          SubTitle: "Vyberte špecifickú verziu časti",
+        },
+      },
       CustomModel: {
         Title: "Vlastné modely",
         SubTitle: "Možnosti vlastného modelu, oddelené čiarkou",
@@ -399,6 +422,21 @@ const sk: PartialLocaleType = {
   },
   FineTuned: {
     Sysmessage: "Ste asistent, ktorý",
+  },
+  SearchChat: {
+    Name: "Hľadať",
+    Page: {
+      Title: "Hľadať v histórii chatu",
+      Search: "Zadajte kľúčové slová na vyhľadávanie",
+      NoResult: "Nenašli sa žiadne výsledky",
+      NoData: "Žiadne údaje",
+      Loading: "Načítava sa",
+
+      SubTitle: (count: number) => `Nájdených ${count} výsledkov`,
+    },
+    Item: {
+      View: "Zobraziť",
+    },
   },
   Mask: {
     Name: "Maska",

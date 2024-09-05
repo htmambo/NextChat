@@ -42,6 +42,7 @@ const cn = {
       PinToastAction: "查看",
       Delete: "删除",
       Edit: "编辑",
+      FullScreen: "全屏",
     },
     Commands: {
       new: "新建聊天",
@@ -104,6 +105,10 @@ const cn = {
       Toast: "正在生成截图",
       Modal: "长按或右键保存图片",
     },
+    Artifacts: {
+      Title: "分享页面",
+      Error: "分享失败",
+    },
   },
   Select: {
     Search: "搜索消息",
@@ -129,6 +134,7 @@ const cn = {
   Settings: {
     Title: "设置",
     SubTitle: "所有设置选项",
+    ShowPassword: "显示密码",
 
     Danger: {
       Reset: {
@@ -152,6 +158,11 @@ const cn = {
     FontSize: {
       Title: "字体大小",
       SubTitle: "聊天内容的字体大小",
+    },
+    FontFamily: {
+      Title: "聊天字体",
+      SubTitle: "聊天内容的字体，若置空则应用全局默认字体",
+      Placeholder: "字体名称",
     },
     InjectSystemPrompts: {
       Title: "注入系统级提示信息",
