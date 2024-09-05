@@ -291,7 +291,7 @@ export function SideBar(props: { className?: string }) {
           }
         }}
       >
-        <ChatList narrow={shouldNarrow} />
+        <ChatList narrow={shouldNarrow} search={chatListSearch} />
       </SideBarBody>
       <SideBarTail
         primaryAction={
