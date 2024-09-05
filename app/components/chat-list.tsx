@@ -9,15 +9,15 @@ import {
   OnDragEndResponder,
 } from "@hello-pangea/dnd";
 
-import { ChatSession, useChatStore } from "../store";
+import { useChatStore } from "../store";
 
 import Locale from "../locales";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Path } from "../constant";
 import { MaskAvatar } from "./mask";
 import { Mask } from "../store/mask";
-import { useRef, useEffect, useState } from "react";
-import { showConfirm, SearchInput } from "./ui-lib";
+import { useRef, useEffect } from "react";
+import { showConfirm } from "./ui-lib";
 import { useMobileScreen } from "../utils";
 
 export function ChatItem(props: {
@@ -40,12 +40,16 @@ export function ChatItem(props: {
       });
     }
   }, [props.selected]);
+
+  const { pathname: currentPath } = useLocation();
   return (
     <Draggable draggableId={`${props.id}`} index={props.index}>
       {(provided) => (
         <div
           className={`${styles["chat-item"]} ${
-            props.selected && styles["chat-item-selected"]
+            props.selected &&
+            (currentPath === Path.Chat || currentPath === Path.Home) &&
+            styles["chat-item-selected"]
           }`}
           onClick={props.onClick}
           ref={(ele) => {
@@ -98,7 +102,7 @@ export function ChatItem(props: {
   );
 }
 
-export function ChatList(props: { narrow?: boolean; search: string }) {
+export function ChatList(props: { narrow?: boolean }) {
   const [sessions, selectedIndex, selectSession, moveSession] = useChatStore(
     (state) => [
       state.sessions,
@@ -127,38 +131,6 @@ export function ChatList(props: { narrow?: boolean; search: string }) {
     moveSession(source.index, destination.index);
   };
 
-  function haveSearchKeyword(item: ChatSession): boolean {
-    if (props.search.length === 0) {
-      return true;
-    }
-
-    let foundKeyword = false;
-
-    item.messages.forEach((message) => {
-      // Check if content is a string before calling includes
-      // console.log(chatListSearch, message.content, message.content.includes(chatListSearch))
-      if (typeof message.content === 'string' && message.content.includes(props.search)) {
-        foundKeyword = true;
-        return;
-      }
-
-      // If content is an array of MultimodalContent, you might need to handle it differently
-      if (Array.isArray(message.content)) {
-        // Handle the case where content is an array of MultimodalContent
-        message.content.forEach((multimodalContent) => {
-          if (multimodalContent.type === 'text' && 
-              multimodalContent.text && 
-              multimodalContent.text.includes(props.search)) {
-            foundKeyword = true;
-            return;
-          }
-        });
-      }
-    });
-
-    return foundKeyword;
-  }
-
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId="chat-list">
@@ -168,30 +140,30 @@ export function ChatList(props: { narrow?: boolean; search: string }) {
             ref={provided.innerRef}
             {...provided.droppableProps}
           >
-            {sessions.map((item, i) => haveSearchKeyword(item) && (
-                  <ChatItem
-                    title={item.topic}
-                    time={new Date(item.lastUpdate).toLocaleString()}
-                    count={item.messages.length}
-                    key={item.id}
-                    id={item.id}
-                    index={i}
-                    selected={i === selectedIndex}
-                    onClick={() => {
-                      navigate(Path.Chat);
-                      selectSession(i);
-                    }}
-                    onDelete={async () => {
-                      if (
-                        (!props.narrow && !isMobileScreen) ||
-                        (await showConfirm(Locale.Home.DeleteChat))
-                      ) {
-                        chatStore.deleteSession(i);
-                      }
-                    }}
-                    narrow={props.narrow}
-                    mask={item.mask}
-                  />
+            {sessions.map((item, i) => (
+              <ChatItem
+                title={item.topic}
+                time={new Date(item.lastUpdate).toLocaleString()}
+                count={item.messages.length}
+                key={item.id}
+                id={item.id}
+                index={i}
+                selected={i === selectedIndex}
+                onClick={() => {
+                  navigate(Path.Chat);
+                  selectSession(i);
+                }}
+                onDelete={async () => {
+                  if (
+                    (!props.narrow && !isMobileScreen) ||
+                    (await showConfirm(Locale.Home.DeleteChat))
+                  ) {
+                    chatStore.deleteSession(i);
+                  }
+                }}
+                narrow={props.narrow}
+                mask={item.mask}
+              />
             ))}
             {provided.placeholder}
           </div>

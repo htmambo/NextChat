@@ -122,26 +122,9 @@ export const usePromptStore = createPersistStore(
       SearchService.add(prompt);
     },
 
-    clearUserPrompts() {
-      const prompts = get().prompts;
-      const userPromptIds = Object.values(prompts)
-        .filter((prompt) => prompt.isUser)
-        .map((prompt) => prompt.id);
-
-      userPromptIds.forEach((id) => {
-        delete prompts[id];
-        SearchService.remove(id);
-      });
-
-      set(() => ({
-        prompts,
-        counter: get().counter + 1,
-      }));
-    },
-
     search(text: string) {
       if (text.length === 0) {
-        // return all prompts
+        // return all rompts
         return this.getUserPrompts().concat(SearchService.builtinPrompts);
       }
       return SearchService.search(text) as Prompt[];
@@ -171,7 +154,7 @@ export const usePromptStore = createPersistStore(
       fetch(PROMPT_URL)
         .then((res) => res.json())
         .then((res) => {
-          let fetchPrompts = [res.en, res.cn];
+          let fetchPrompts = [res.en, res.tw, res.cn];
           if (getLang() === "cn") {
             fetchPrompts = fetchPrompts.reverse();
           }
@@ -192,7 +175,8 @@ export const usePromptStore = createPersistStore(
           const allPromptsForSearch = builtinPrompts
             .reduce((pre, cur) => pre.concat(cur), [])
             .filter((v) => !!v.title && !!v.content);
-          SearchService.count.builtin = res.en.length + res.cn.length;
+          SearchService.count.builtin =
+            res.en.length + res.cn.length + res.tw.length;
           SearchService.init(allPromptsForSearch, userPrompts);
         });
     },

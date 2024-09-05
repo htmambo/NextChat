@@ -1,25 +1,23 @@
-import { getClientConfig } from "./config/client";
 import { useEffect, useState } from "react";
 import { showToast } from "./components/ui-lib";
 import Locale from "./locales";
 import { RequestMessage } from "./client/api";
-import { DEFAULT_MODELS } from "./constant";
 
 export function trimTopic(topic: string) {
   // Fix an issue where double quotes still show in the Indonesian language
   // This will remove the specified punctuation from the end of the string
   // and also trim quotes from both the start and end if they exist.
-  return topic
-    // fix for gemini
-    .replace(/^["“”*]+|["“”*]+$/g, "")
-    .replace(/[，。！？”“"、,.!?*]*$/, "");
+  return (
+    topic
+      // fix for gemini
+      .replace(/^["“”*]+|["“”*]+$/g, "")
+      .replace(/[，。！？”“"、,.!?*]*$/, "")
+  );
 }
-
-const isApp = !!getClientConfig()?.isApp;
 
 export async function copyToClipboard(text: string) {
   try {
-    if (isApp && window.__TAURI__) {
+    if (window.__TAURI__) {
       window.__TAURI__.writeText(text);
     } else {
       await navigator.clipboard.writeText(text);
@@ -42,96 +40,47 @@ export async function copyToClipboard(text: string) {
   }
 }
 
-export async function downloadAs(json: string, filename: string) {
-  const blob = new Blob([json], { type: "application/json" });
-  const arrayBuffer = await blob.arrayBuffer();
-  const uint8Array = new Uint8Array(arrayBuffer);
+export async function downloadAs(text: string, filename: string) {
+  if (window.__TAURI__) {
+    const result = await window.__TAURI__.dialog.save({
+      defaultPath: `${filename}`,
+      filters: [
+        {
+          name: `${filename.split(".").pop()} files`,
+          extensions: [`${filename.split(".").pop()}`],
+        },
+        {
+          name: "All Files",
+          extensions: ["*"],
+        },
+      ],
+    });
 
-  try {
-    if (window.__TAURI__) {
-      /**
-       * Fixed client app [Tauri]
-       * Resolved the issue where files couldn't be saved when there was a `:` in the dialog.
-      **/
-      const fileName = filename.replace(/:/g, '');
-      const fileExtension = fileName.split('.').pop();
-      const result = await window.__TAURI__.dialog.save({
-        defaultPath: `${fileName}`,
-        filters: [
-          {
-            name: `${fileExtension} files`,
-            extensions: [`${fileExtension}`],
-          },
-          {
-            name: "All Files",
-            extensions: ["*"],
-          },
-        ],
-      });
-
-      if (result !== null) {
-        await window.__TAURI__.fs.writeBinaryFile(
-          result,
-          Uint8Array.from(uint8Array)
-        );
+    if (result !== null) {
+      try {
+        await window.__TAURI__.fs.writeTextFile(result, text);
         showToast(Locale.Download.Success);
-      } else {
+      } catch (error) {
         showToast(Locale.Download.Failed);
       }
     } else {
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = `${filename}`;
-      anchor.click();
-      URL.revokeObjectURL(url);
-      showToast(Locale.Download.Success);
+      showToast(Locale.Download.Failed);
     }
-  } catch (error) {
-    showToast(Locale.Download.Failed);
+  } else {
+    const element = document.createElement("a");
+    element.setAttribute(
+      "href",
+      "data:text/plain;charset=utf-8," + encodeURIComponent(text),
+    );
+    element.setAttribute("download", filename);
+
+    element.style.display = "none";
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
   }
-}
-
-export function compressImage(file: File, maxSize: number): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (readerEvent: any) => {
-      const image = new Image();
-      image.onload = () => {
-        let canvas = document.createElement("canvas");
-        let ctx = canvas.getContext("2d");
-        let width = image.width;
-        let height = image.height;
-        let quality = 0.9;
-        let dataUrl;
-
-        do {
-          canvas.width = width;
-          canvas.height = height;
-          ctx?.clearRect(0, 0, canvas.width, canvas.height);
-          ctx?.drawImage(image, 0, 0, width, height);
-          dataUrl = canvas.toDataURL("image/jpeg", quality);
-
-          if (dataUrl.length < maxSize) break;
-
-          if (quality > 0.5) {
-            // Prioritize quality reduction
-            quality -= 0.1;
-          } else {
-            // Then reduce the size
-            width *= 0.9;
-            height *= 0.9;
-          }
-        } while (dataUrl.length > maxSize);
-
-        resolve(dataUrl);
-      };
-      image.onerror = reject;
-      image.src = readerEvent.target.result;
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
 }
 
 export function readFromFile() {
@@ -245,6 +194,7 @@ export function autoGrowTextArea(dom: HTMLTextAreaElement) {
   measureDom.style.width = width + "px";
   measureDom.innerText = dom.value !== "" ? dom.value : "1";
   measureDom.style.fontSize = dom.style.fontSize;
+  measureDom.style.fontFamily = dom.style.fontFamily;
   const endWithEmptyLine = dom.value.endsWith("\n");
   const height = parseFloat(window.getComputedStyle(measureDom).height);
   const singleLineHeight = parseFloat(
@@ -299,9 +249,24 @@ export function getMessageImages(message: RequestMessage): string[] {
 }
 
 export function isVisionModel(model: string) {
+  // Note: This is a better way using the TypeScript feature instead of `&&` or `||` (ts v5.5.0-dev.20240314 I've been using)
+
+  const visionKeywords = [
+    "vision",
+    "claude-3",
+    "gemini-1.5-pro",
+    "gemini-1.5-flash",
+    "gpt-4o",
+    "gpt-4o-mini",
+  ];
+  const isGpt4Turbo =
+    model.includes("gpt-4-turbo") && !model.includes("preview");
+
   return (
-    // model.startsWith("gpt-4-vision") ||
-    // model.startsWith("gemini-pro-vision") ||
-    model.includes("vision")
+    visionKeywords.some((keyword) => model.includes(keyword)) || isGpt4Turbo
   );
+}
+
+export function isDalle3(model: string) {
+  return "dall-e-3" === model;
 }
