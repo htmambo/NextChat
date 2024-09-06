@@ -582,12 +582,12 @@ function SyncConfigModal(props: { onClose?: () => void }) {
     </div>
   );
 }
+
 /** 
  * Manage Local Data
  * Author : @H0llyW00dzZ
  * WIP
  **/
-
 function LocalDataModal(props: { onClose?: () => void }) {
   const [showLocalData, setShowLocalData] = useState(false);
   const [exporting, setExporting] = useState(false);
