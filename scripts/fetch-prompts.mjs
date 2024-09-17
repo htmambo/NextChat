@@ -39,6 +39,25 @@ async function fetchCN() {
   }
 }
 
+async function fetchTW() {
+  console.log("[Fetch] fetching tw prompts...");
+  try {
+    const response = await Promise.race([fetch(TW_URL), timeoutPromise(5000)]);
+    const raw = await response.json();
+    return raw
+      .map((v) => [v.act, v.prompt])
+      .filter(
+        (v) =>
+          v[0] &&
+          v[1] &&
+          ignoreWords.every((w) => !v[0].includes(w) && !v[1].includes(w)),
+      );
+  } catch (error) {
+    console.error("[Fetch] failed to fetch tw prompts", error);
+    return [];
+  }
+}
+
 async function fetchEN() {
   console.log("[Fetch] fetching en prompts...");
   try {
