@@ -17,7 +17,7 @@ export function createCustomRESTClient(store: SyncStore) {
         const res = await fetch(this.path("get", storeKey), {
           method: "GET",
           headers: this.headers(),
-          proxyUrl,
+          //proxyUrl,
           mode: "cors",
         });
 
@@ -37,7 +37,7 @@ export function createCustomRESTClient(store: SyncStore) {
       const res = await fetch(this.path("get", storeKey), {
         method: "GET",
         headers: this.headers(),
-        proxyUrl,
+        //proxyUrl,
         mode: "cors",
       });
 
@@ -60,7 +60,7 @@ export function createCustomRESTClient(store: SyncStore) {
         method: "POST",
         headers: this.headers(),
         body: value,
-        proxyUrl,
+        //proxyUrl,
         mode: "cors",
       })
         .then((res) => {
