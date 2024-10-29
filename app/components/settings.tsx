@@ -284,7 +284,7 @@ function CheckButton() {
   const syncStore = useSyncStore();
 
   const couldCheck = useMemo(() => {
-    return syncStore.cloudSync();
+    return syncStore.couldSync();
   }, [syncStore]);
 
   const [checkState, setCheckState] = useState<
@@ -784,7 +784,7 @@ function SyncItems() {
   const promptStore = usePromptStore();
   const maskStore = useMaskStore();
   const couldSync = useMemo(() => {
-    return syncStore.cloudSync();
+    return syncStore.couldSync();
   }, [syncStore]);
 
   const [showSyncConfigModal, setShowSyncConfigModal] = useState(false);
