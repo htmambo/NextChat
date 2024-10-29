@@ -13,7 +13,6 @@ import { downloadAs, readFromFile } from "../utils";
 import { showToast } from "../components/ui-lib";
 import Locale from "../locales";
 import { createSyncClient, ProviderType } from "../utils/cloud";
-import { corsPath } from "../utils/cors";
 
 export interface WebDavConfig {
   server: string;
@@ -29,7 +28,7 @@ export type SyncStore = GetStoreState<typeof useSyncStore> & {
 const DEFAULT_SYNC_STATE = {
   provider: ProviderType.WebDAV,
   useProxy: true,
-  proxyUrl: corsPath(ApiPath.Cors),
+  proxyUrl: ApiPath.Cors as string,
 
   CustomREST: {
     endpoint: "",

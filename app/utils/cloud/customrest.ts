@@ -1,7 +1,6 @@
 import { STORAGE_KEY, REPO_URL } from "@/app/constant";
 import { chunks } from "../format";
 import { SyncStore } from "@/app/store/sync";
-import { corsFetch } from "../cors";
 
 export type CustomRESTClient = ReturnType<typeof createCustomRESTClient>;
 
@@ -15,7 +14,7 @@ export function createCustomRESTClient(store: SyncStore) {
   return {
     async check() {
       try {
-        const res = await corsFetch(this.path("get", storeKey), {
+        const res = await fetch(this.path("get", storeKey), {
           method: "GET",
           headers: this.headers(),
           proxyUrl,
@@ -35,7 +34,7 @@ export function createCustomRESTClient(store: SyncStore) {
     },
 
     async get() {
-      const res = await corsFetch(this.path("get", storeKey), {
+      const res = await fetch(this.path("get", storeKey), {
         method: "GET",
         headers: this.headers(),
         proxyUrl,
@@ -57,7 +56,7 @@ export function createCustomRESTClient(store: SyncStore) {
     },
 
     async set(_: string, value: string) {
-      return corsFetch(this.path("set", storeKey), {
+      return fetch(this.path("set", storeKey), {
         method: "POST",
         headers: this.headers(),
         body: value,
