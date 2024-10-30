@@ -1,6 +1,6 @@
-import { STORAGE_KEY, REPO_URL } from "@/app/constant";
-import { chunks } from "../format";
+import { STORAGE_KEY } from "@/app/constant";
 import { SyncStore } from "@/app/store/sync";
+import { chunks } from "../format";
 
 export type CustomRESTClient = ReturnType<typeof createCustomRESTClient>;
 
@@ -14,10 +14,9 @@ export function createCustomRESTClient(store: SyncStore) {
   return {
     async check() {
       try {
-        const res = await fetch(this.path("get", storeKey), {
+        const res = await fetch(this.path(`get/${storeKey}`, proxyUrl), {
           method: "GET",
           headers: this.headers(),
-          //proxyUrl,
           mode: "cors",
         });
 
@@ -34,10 +33,9 @@ export function createCustomRESTClient(store: SyncStore) {
     },
 
     async get() {
-      const res = await fetch(this.path("get", storeKey), {
+      const res = await fetch(this.path(`get/${storeKey}`, proxyUrl), {
         method: "GET",
         headers: this.headers(),
-        //proxyUrl,
         mode: "cors",
       });
 
@@ -56,11 +54,10 @@ export function createCustomRESTClient(store: SyncStore) {
     },
 
     async set(_: string, value: string) {
-      return fetch(this.path("set", storeKey), {
+      return fetch(this.path(`set/${storeKey}`, proxyUrl), {
         method: "POST",
         headers: this.headers(),
         body: value,
-        //proxyUrl,
         mode: "cors",
       })
         .then((res) => {
@@ -89,18 +86,34 @@ export function createCustomRESTClient(store: SyncStore) {
       };
     },
 
-    path(method: string, path: string) {
-      let url = config.endpoint;
-
-      if (!url.endsWith("/")) {
-        url += "/";
+    path(path: string, proxyUrl: string = "") {
+      if (!path.endsWith("/")) {
+        path += "/";
       }
-
       if (path.startsWith("/")) {
         path = path.slice(1);
       }
 
-      return url + method + "/" + path;
+      if (proxyUrl.length > 0 && !proxyUrl.endsWith("/")) {
+        proxyUrl += "/";
+      }
+
+      let url;
+      const pathPrefix = config.endpoint;
+      if (!pathPrefix.endsWith("/")) {
+        pathPrefix += "/";
+      }
+
+      try {
+        let u = new URL(proxyUrl + pathPrefix + path);
+        // add query params
+        u.searchParams.append("endpoint", config.endpoint);
+        url = u.toString();
+      } catch (e) {
+        url = pathPrefix + path + "?endpoint=" + config.endpoint;
+      }
+
+      return url;
     },
   };
 }
