@@ -108,6 +108,7 @@ export const useSyncStore = createPersistStore(
 
     async sync() {
       if (get().syncing) {
+        console.log('正在同步中，请稍候......');
         return false;
       }
 
@@ -125,7 +126,9 @@ export const useSyncStore = createPersistStore(
 
         // 1. 覆盖远程所有数据（这时不需要从远程下载）
         if (get().enableOverwriteRemote) {
+          console.log('当前设置为覆盖远程，所以不需要远程的数据');
         } else {
+          console.log('获取远程的数据......');
           const tmpRemoteState = JSON.parse(
             await client.get(config.username),
           ) as AppState;
