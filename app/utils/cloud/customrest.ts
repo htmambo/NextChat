@@ -99,7 +99,7 @@ export function createCustomRESTClient(store: SyncStore) {
       }
 
       let url;
-      const pathPrefix = config.endpoint;
+      let pathPrefix = config.endpoint;
       if (!pathPrefix.endsWith("/")) {
         pathPrefix += "/";
       }
