@@ -109,7 +109,7 @@ export const useSyncStore = createPersistStore(
     async sync() {
       if (get().syncing) {
         console.log('正在同步中，请稍候......');
-        return false;
+        //return false;
       }
 
       const localState = getLocalAppState();
