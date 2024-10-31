@@ -67,7 +67,7 @@ const MergeStates: StateMerger = {
     // merge sessions
     const localSessions: Record<string, ChatSession> = {};
     localState.sessions.forEach((s) => (localSessions[s.id] = s));
-
+    console.log(localState, remoteState);
     remoteState.sessions.forEach((remoteSession) => {
       // skip empty chats
       if (remoteSession.messages.length === 0) return;
