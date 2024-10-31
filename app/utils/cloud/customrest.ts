@@ -50,6 +50,7 @@ export function createCustomRESTClient(store: SyncStore) {
         resJson = (await res.json()) as { result: string };
 
       }
+      console.log('服务器返回的信息：', resJson);
       return resJson.result;
     },
 

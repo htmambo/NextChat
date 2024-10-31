@@ -134,6 +134,7 @@ export const useSyncStore = createPersistStore(
           ) as AppState;
           // 3. 仅同步用户数据（替换remoteState中的access-control、app-config为localState中的值）
           const remoteState = { ...tmpRemoteState };
+          console.log('从远程获取到的数据：', remoteState);
           if (get().onlysyncuserdata) {
             // 如果onlysyncuserdata为true，不同步access-control、app-config。需要生成一个新的用于合并的变量，因为remoteState是只读的
             remoteState[StoreKey.Access] = localState[StoreKey.Access];

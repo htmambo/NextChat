@@ -1,4 +1,3 @@
-
 export const OWNER = "htmambo";
 export const REPO = "NextChat";
 export const REPO_URL = `https://github.com/${OWNER}/${REPO}`;
@@ -317,6 +316,7 @@ const anthropicModels = [
   "claude-3-opus-20240229",
   "claude-3-haiku-20240307",
   "claude-3-5-sonnet-20240620",
+  "claude-3-5-sonnet-20241022",
 ];
 
 const baiduModels = [
