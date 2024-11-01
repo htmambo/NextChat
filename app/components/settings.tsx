@@ -73,6 +73,7 @@ import {
   Stability,
   Iflytek,
   SAAS_CHAT_URL,
+  ChatGLM,
 } from "../constant";
 import { Prompt, SearchService, usePromptStore } from "../store/prompt";
 import { ErrorBoundary } from "./error";
