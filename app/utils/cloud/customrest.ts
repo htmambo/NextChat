@@ -105,13 +105,12 @@ export function createCustomRESTClient(store: SyncStore) {
         pathPrefix += "/";
       }
 
+      // 尝试解析URL，如果失败则直接拼接
       try {
         let u = new URL(proxyUrl + pathPrefix + path);
-        // add query params
-        u.searchParams.append("endpoint", config.endpoint);
         url = u.toString();
       } catch (e) {
-        url = pathPrefix + path + "?endpoint=" + config.endpoint;
+        url = pathPrefix + path;        
       }
 
       return url;
