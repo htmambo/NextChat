@@ -67,16 +67,7 @@ const MergeStates: StateMerger = {
     // merge sessions
     const localSessions: Record<string, ChatSession> = {};
     localState.sessions.forEach((s) => (localSessions[s.id] = s));
-    console.log(localState, remoteState);
-    /**
-     * remoteState的结构为：
-     * [
-     *  'sessions' => [
-     *      'messages' => [
-     *      ],
-     *   ]
-     * ]
-     */
+
     remoteState.sessions.forEach((remoteSession) => {
       // skip empty chats
       if (remoteSession.messages.length === 0) return;
