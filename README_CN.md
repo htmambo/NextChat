@@ -9,14 +9,22 @@
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fhtmambo%2FNextChat&env=OPENAI_API_KEY&env=CODE&project-name=chatgpt-next-web&repository-name=ChatGPT-Next-Web)
 
-[![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/ZBUEFA)
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/htmambo/NextChat)
 
-![主界面](./docs/images/cover.png)
 
 </div>
 
+## 企业版
+满足您公司私有化部署和定制需求
+- **品牌定制**：企业量身定制 VI/UI，与企业品牌形象无缝契合
+- **资源集成**：由企业管理人员统一配置和管理数十种 AI 资源，团队成员开箱即用
+- **权限管理**：成员权限、资源权限、知识库权限层级分明，企业级 Admin Panel 统一控制
+- **知识接入**：企业内部知识库与 AI 能力相结合，比通用 AI 更贴近企业自身业务需求
+- **安全审计**：自动拦截敏感提问，支持追溯全部历史对话记录，让 AI 也能遵循企业信息安全规范
+- **私有部署**：企业级私有部署，支持各类主流私有云部署，确保数据安全和隐私保护
+- **持续更新**：提供多模态、智能体等前沿能力持续更新升级服务，常用常新、持续先进
+企业版咨询: **business@nextchat.dev**
+<img width="300" src="https://github.com/user-attachments/assets/3daeb7b6-ab63-4542-9141-2e4a12c80601">
 ## 开始使用
 
 1. 准备好你的 [OpenAI API Key](https://platform.openai.com/account/api-keys);
@@ -25,6 +33,9 @@
 3. 部署完毕后，即可开始使用；
 4. （可选）[绑定自定义域名](https://vercel.com/docs/concepts/projects/domains/add-a-domain)：Vercel 分配的域名 DNS 在某些区域被污染了，绑定自定义域名即可直连。
 
+<div align="center">
+![主界面](./docs/images/cover.png)
+</div>
 ## 保持更新
 
 如果你按照上述步骤一键部署了自己的项目，可能会发现总是提示“存在更新”的问题，这是由于 Vercel 会默认为你创建一个新项目而不是 fork 本项目，这会导致无法正确地检测更新。
@@ -36,7 +47,7 @@
 
 ### 打开自动更新
 
-> 如果你遇到了 Upstream Sync 执行错误，请手动 Sync Fork 一次！
+> 如果你遇到了 Upstream Sync 执行错误，请[手动 Sync Fork 一次](./README_CN.md#手动更新代码)！
 
 当你 fork 项目之后，由于 Github 的限制，需要手动去你 fork 后的项目的 Actions 页面启用 Workflows，并启用 Upstream Sync Action，启用之后即可开启每小时定时自动更新：
 
@@ -166,6 +177,10 @@ ByteDance Api Url.
 
 讯飞星火Api Secret.
 
+### `CHATGLM_API_KEY` (可选)
+ChatGLM Api Key.
+### `CHATGLM_URL` (可选)
+ChatGLM Api Url.
 
 
 ### `HIDE_USER_API_KEY` （可选）

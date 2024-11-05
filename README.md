@@ -300,6 +300,10 @@ iflytek Api Key.
 ### `IFLYTEK_API_SECRET` (Optional)
 
 iflytek Api Secret.
+### `CHATGLM_API_KEY` (optional)
+ChatGLM Api Key.
+### `CHATGLM_URL` (optional)
+ChatGLM Api Url.
 ### `HIDE_USER_API_KEY` (optional)
 
 > Default: Empty
