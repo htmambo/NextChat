@@ -232,7 +232,7 @@ export const XAI = {
 
 export const ChatGLM = {
   ExampleEndpoint: CHATGLM_BASE_URL,
-  ChatPath: "/api/paas/v4/chat/completions",
+  ChatPath: "api/paas/v4/chat/completions",
 };
 
 export const DEFAULT_INPUT_TEMPLATE = `{{input}}`; // input / time / model / lang
@@ -559,5 +559,6 @@ export const PLUGINS = [
   { name: "Stable Diffusion", path: Path.Sd },
   { name: "Search Chat", path: Path.SearchChat },
 ];
+
 export const SAAS_CHAT_URL = "https://nextchat.dev/chat";
 export const SAAS_CHAT_UTM_URL = "https://nextchat.dev/chat?utm=github";
