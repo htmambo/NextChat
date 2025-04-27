@@ -232,6 +232,7 @@ export function SideBar(props: { className?: string }) {
   const config = useAppConfig();
   const chatStore = useChatStore();
   const [mcpEnabled, setMcpEnabled] = useState(false);
+  const [chatListSearch, setChatListSearch] = useState("");
 
   useEffect(() => {
     // 检查 MCP 是否启用
