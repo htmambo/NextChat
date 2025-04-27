@@ -24,7 +24,6 @@ import {
   MIN_SIDEBAR_WIDTH,
   NARROW_SIDEBAR_WIDTH,
   Path,
-  PLUGINS,
   REPO_URL,
 } from "../constant";
 
