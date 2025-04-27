@@ -4,7 +4,7 @@
   <img src="./docs/images/ent.svg" alt="icon"/>
 </a>
 
-<h1 align="center">NextChat (ChatGPT Next Web)</h1>
+<h1 align="center">NextChat</h1>
 
 English / [简体中文](./README_CN.md)
 
@@ -18,11 +18,11 @@ One-Click to get a well-designed cross-platform ChatGPT web UI, with GPT3, GPT4 
 [![MacOS][MacOS-image]][download-url]
 [![Linux][Linux-image]][download-url]
 
-[NextChatAI](https://nextchat.dev/chat?utm_source=readme) / [Web App](https://app.nextchat.dev) / [Desktop App](https://github.com/Yidadaa/ChatGPT-Next-Web/releases) / [Discord](https://discord.gg/YCkeafCafC) / [Enterprise Edition](#enterprise-edition) / [Twitter](https://twitter.com/NextChatDev)
+[NextChatAI](https://nextchat.club?utm_source=readme) / [iOS APP](https://apps.apple.com/us/app/nextchat-ai/id6743085599) / [Web App Demo](https://app.nextchat.dev) / [Desktop App](https://github.com/Yidadaa/ChatGPT-Next-Web/releases) / [Enterprise Edition](#enterprise-edition) 
 
 [NextChatAI](https://nextchat.pages.dev/) / [网页版](https://nextchat.pages.dev) / [客户端](https://github.com/htmambo/NextChat/releases) / [企业版](#%E4%BC%81%E4%B8%9A%E7%89%88) / [反馈](https://github.com/Yidadaa/ChatGPT-Next-Web/issues)
 
-[saas-url]: https://nextchat.dev/chat?utm_source=readme
+[saas-url]: https://nextchat.club?utm_source=readme
 [saas-image]: https://img.shields.io/badge/NextChat-Saas-green?logo=microsoftedge
 [web-url]: https://app.nextchat.dev/
 [download-url]: https://github.com/htmambo/NextChat/releases
