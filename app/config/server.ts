@@ -1,5 +1,5 @@
 import md5 from "spark-md5";
-import { DEFAULT_MODELS, DEFAULT_GA_ID } from "../constant";
+import { DEFAULT_MODELS } from "../constant";
 import { isGPT4Model } from "../utils/model";
 
 declare global {
@@ -37,9 +37,6 @@ declare global {
       // google only
       GOOGLE_API_KEY?: string;
       GOOGLE_URL?: string;
-
-      // google tag manager
-      GTM_ID?: string;
 
       // anthropic only
       ANTHROPIC_URL?: string;
@@ -245,9 +242,6 @@ export const getServerSideConfig = () => {
     isSiliconFlow,
     siliconFlowUrl: process.env.SILICONFLOW_URL,
     siliconFlowApiKey: getApiKey(process.env.SILICONFLOW_API_KEY),
-
-    gtmId: process.env.GTM_ID,
-    gaId: process.env.GA_ID || DEFAULT_GA_ID,
 
     needCode: ACCESS_CODES.size > 0,
     code: process.env.CODE,
