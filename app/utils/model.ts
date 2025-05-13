@@ -88,6 +88,13 @@ export function collectModelTable(
         Object.values(modelTable).forEach(
           (model) => (model.available = available),
         );
+      } else if (name.endsWith("*")) {
+        const prefix = name.slice(0, -1);
+        Object.values(modelTable).forEach((model) => {
+          if (model.name.startsWith(prefix)) {
+            model.available = available;
+          }
+        });
       } else {
         // 1. find model by name, and set available value
         const [customModelName, customProviderName] = getModelProvider(name);
